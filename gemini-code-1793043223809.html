@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fertile Fields</title>
+<style>
+:root{--g:#176b45;--g2:#238653;--ink:#18382b;--muted:#6d7f75;--line:#dce9df;--bg:#f4f8f4;--pale:#eaf5ec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+.app{max-width:480px;min-height:100vh;margin:auto;background:#f9fcf9;box-shadow:0 0 28px #173b2510}
+.page{display:none;min-height:100vh}.page.active{display:block}.page.active.welcome{display:flex}.page:not(.active){display:none!important}
+.welcome{min-height:100vh;padding:34px 24px 40px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;background:linear-gradient(155deg,#114d34,#176b45 48%,#2b9259);color:#fff}
+.welcome:before,.welcome:after{content:"";position:absolute;border:1px solid #ffffff24;border-radius:50%;width:300px;height:300px;right:-140px;top:12%;box-shadow:0 0 0 35px #ffffff09,0 0 0 70px #ffffff06}
+.welcome:after{width:200px;height:200px;left:-120px;right:auto;top:auto;bottom:5%}
+.welcome-brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1}.mark{width:50px;height:50px;border-radius:16px;background:#ffffff1b;border:1px solid #ffffff35;display:grid;place-items:center;font-size:27px}
+.brand{font-size:19px;font-weight:800;letter-spacing:1px}.tag{font-size:11px;opacity:.75;margin-top:5px;letter-spacing:.7px}
+.hero{position:relative;z-index:1;margin:50px 0}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.8}
+.hero h1{font-size:38px;line-height:1.12;margin:16px 0}.hero p{font-size:15px;line-height:1.7;color:#e1f0e6;max-width:310px;margin:0}
+.start{position:relative;z-index:1;width:100%;border:0;border-radius:15px;background:#fff;color:var(--g);font-size:16px;font-weight:800;padding:17px;cursor:pointer;box-shadow:0 9px 22px #0a3c251f}
+.welcome-foot{position:relative;z-index:1;text-align:center;font-size:11px;opacity:.7;margin-top:20px}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:19px 18px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:2}
+.back{border:0;background:var(--pale);color:var(--g);width:38px;height:38px;border-radius:12px;font-size:21px;cursor:pointer}
+.mini-mark{width:38px;height:38px;border-radius:12px;background:var(--g);color:#fff;display:grid;place-items:center;font-size:20px}
+.top-title{font-weight:800;font-size:16px}.top-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.content{padding:22px 18px 36px}.heading-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+h2{font-size:23px;margin:0}.counter{background:var(--pale);color:var(--g);border-radius:22px;padding:7px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.intro{font-size:13px;color:var(--muted);line-height:1.55;margin:-6px 0 20px}
+.empty{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 18px;text-align:center}.empty-icon{width:62px;height:62px;background:var(--pale);border-radius:19px;margin:0 auto 14px;display:grid;place-items:center;font-size:30px}
+.empty h3{margin:0 0 8px;font-size:17px}.empty p{font-size:13px;color:var(--muted);line-height:1.5;margin:0 auto;max-width:250px}
+.add{width:100%;border:0;border-radius:14px;background:var(--g2);color:white;font-size:15px;font-weight:800;padding:16px;margin-top:18px;cursor:pointer}
+.farm-list{display:grid;gap:12px}.farm-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px}
+.farm-icon{width:48px;height:48px;flex-shrink:0;background:var(--pale);border-radius:15px;display:grid;place-items:center;font-size:24px}
+.farm-info{flex:1;min-width:0}.farm-name{font-size:15px;font-weight:800;overflow-wrap:anywhere}.farm-details{font-size:12px;color:var(--muted);line-height:1.5;margin-top:5px}
+.remove{border:0;background:#f0f6f1;color:var(--g);font-size:12px;font-weight:800;border-radius:10px;padding:9px;cursor:pointer}
+.backdrop{display:none;position:fixed;inset:0;background:#0c261bb5;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;align-items:flex-end;justify-content:center;padding:12px}.backdrop.show{display:flex}
+.modal{width:100%;max-width:456px;background:#fff;border-radius:24px;padding:22px;max-height:92vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.modal h2{font-size:21px}.close{border:0;background:#eef5ef;color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:22px;cursor:pointer}
+label{display:block;font-size:13px;font-weight:800;margin:15px 0 7px}input,select{width:100%;padding:14px;border:1px solid #cbdccf;border-radius:12px;font-size:15px;background:#fcfefc;color:var(--ink);outline:none}
+input:focus,select:focus{border-color:var(--g2);box-shadow:0 0 0 3px #23865318}.actions{display:flex;gap:10px;margin-top:22px}
+.cancel,.save{flex:1;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:14px;cursor:pointer}.cancel{background:#eef3ef;color:var(--ink)}.save{background:var(--g2);color:white}
+.form-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px}
+
+.detail-actions{display:grid;gap:12px;margin-top:18px}
+.action-card{width:100%;display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:17px;padding:17px;cursor:pointer;color:var(--ink)}
+.action-ico{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:var(--pale);font-size:24px;flex-shrink:0}
+.action-card strong{display:block;font-size:15px}.action-card small{display:block;color:var(--muted);font-size:12px;margin-top:5px;line-height:1.4}
+.detail-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}.water-card{background:linear-gradient(160deg,#f1fff8,#d9f8e9);border:1px solid #c7ead8;border-radius:22px;padding:20px;margin-bottom:16px}
+.water-label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.5px}.water-number{font-size:30px;color:#087c54;font-weight:800;margin:7px 0}
+.tank-visual{height:28px;border-radius:30px;background:#e2ece6;overflow:hidden;margin:14px 0 6px}.tank-fill{height:100%;width:0;background:linear-gradient(90deg,#00a7c8,#00c781);border-radius:30px;transition:width 1s ease}
+.section-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}.section-card h3{margin:0 0 10px;font-size:17px}
+.primary-small{border:0;border-radius:12px;background:var(--g2);color:white;padding:12px 14px;font-weight:800;cursor:pointer}
+.secondary-small{border:1px solid var(--line);border-radius:12px;background:#f7fbf7;color:var(--g);padding:10px 12px;font-weight:700;cursor:pointer}
+.list-row{border-top:1px solid var(--line);padding:12px 0;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.list-row:first-child{border-top:0}
+.spray-chart-row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;padding:13px 0;border-top:1px solid var(--line)}.spray-chart-row:first-child{border-top:0}.spray-date-box{border-radius:12px;background:#e9f8ef;color:#087c54;text-align:center;padding:10px 5px;font-size:12px;font-weight:800;line-height:1.45}.spray-date-box span{display:block;font-size:10px;font-weight:600;color:#477563}.spray-entry{min-width:0}.spray-entry strong{display:block;overflow-wrap:anywhere}.spray-entry .row-meta{overflow-wrap:anywhere}
+.row-meta{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px}.row-buttons{display:flex;gap:6px;flex-shrink:0}.row-buttons button{font-size:11px;padding:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.form-grid .full{grid-column:1/-1}
+.irrigation-entry{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px}.irrigation-entry-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.stage-pill{background:#e6f6eb;color:#087c54;border-radius:20px;padding:6px 10px;font-size:12px;font-weight:800}.water-status-note{font-size:12px;line-height:1.5;color:var(--muted);margin-top:10px}.water-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.water-stat{background:#ffffffb8;border:1px solid #cfe9d8;border-radius:13px;padding:12px}.water-stat span{display:block;color:var(--muted);font-size:11px}.water-stat strong{display:block;color:var(--g);font-size:19px;margin-top:5px}
+
+@media(min-width:600px){body{padding:18px 0}.app{border-radius:26px;overflow:hidden;min-height:calc(100vh - 36px)}.page{min-height:calc(100vh - 36px)}.welcome{min-height:calc(100vh - 36px)}.backdrop{align-items:center}}
+ 
+.rec-warning{padding:12px;border-radius:12px;background:#fff6df;border:1px solid #f0dda7;color:#755719;font-size:12px;line-height:1.5;margin:10px 0}
+.rec-positive{padding:12px;border-radius:12px;background:#eaf7ee;border:1px solid #cce8d4;color:#185d3b;font-size:13px;line-height:1.5;margin:10px 0}
+.nutrient-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}.nutrient-table th,.nutrient-table td{padding:10px 6px;border-bottom:1px solid var(--line);text-align:right}.nutrient-table th:first-child,.nutrient-table td:first-child{text-align:left}.nutrient-table th{background:#eff7f0}
+
+/* Fertilizer picker: compact F3-style search/list and readable saved quantities */
+.fert-search-wrap{position:sticky;top:0;z-index:3;background:#fff;padding:0 0 8px}
+#fertilizerSearch{width:100%;min-height:46px;border:1px solid #cfe0d3;border-radius:13px;background:#f7fbf8;padding:12px 13px;font-size:14px;box-shadow:0 4px 12px rgba(20,70,35,.05);margin:0 0 8px}
+#fertilizerChoices{display:grid;grid-template-columns:1fr;gap:8px;max-height:48vh;overflow:auto;padding-right:2px}
+.fert-choice{display:flex;align-items:flex-start;gap:10px;padding:11px;border:1px solid var(--line);border-radius:13px;background:#fbfdfb}
+.fert-choice-info{flex:1;min-width:0}.fert-choice-info strong{font-size:13px;line-height:1.4;display:inline-block}.fert-choice-info small{font-size:10.5px;line-height:1.45;color:var(--muted);display:inline-block;margin-top:3px}
+.fert-choice .primary-small{flex:0 0 auto;padding:8px 10px;border-radius:9px;font-size:12px;min-width:58px}
+.fert-qty{font-size:21px!important;line-height:1.2!important;font-weight:900;color:var(--g);margin-top:5px!important;display:block!important}
+.fert-grade-sub{font-size:10px!important;color:var(--muted)!important;font-weight:500!important;display:block!important;margin-top:2px!important}
+.fert-set-card{padding:12px 0;border-top:1px solid var(--line);display:block;width:100%;min-width:0;box-sizing:border-box}
+.fert-set-card:first-child{border-top:0}.fert-set-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;width:100%;min-width:0}.fert-set-main{flex:1;min-width:0;overflow-wrap:break-word}.fert-set-name{font-size:14px;font-weight:800;display:block;white-space:normal;word-break:normal;overflow-wrap:break-word;line-height:1.35}.fert-set-grade{font-size:10px;color:var(--muted);display:block;margin-top:3px}.fert-set-qty{font-size:23px;font-weight:900;color:var(--g);white-space:nowrap;flex:0 0 auto;max-width:45%}
+.fert-set-qty small{font-size:10px;font-weight:700;color:var(--muted)}
+
+
+.fert-slab-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.fert-slab-tab{border:1px solid var(--line,#d9e2dc);border-radius:9px;padding:7px 9px;background:#f5f8f5;color:#244b35;font-size:12px;font-weight:700;line-height:1.2;cursor:pointer}.fert-slab-tab.active{background:#246b45;color:#fff;border-color:#246b45}.saved-req-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin:8px 0 12px}.saved-req-cell{padding:7px 4px;border:1px solid #e2e9e3;border-radius:8px;text-align:center;font-size:11px;color:#526257}.saved-req-cell strong{display:block;font-size:13px;color:#193e2b;margin-top:2px}@media(max-width:420px){.saved-req-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.fert-use-box{display:block;width:100%;box-sizing:border-box;min-width:0;margin-top:10px;padding:10px;border:1px solid var(--line,#d9e5df);border-radius:12px;background:#f8fcf9}.fert-use-row{display:flex;gap:8px;align-items:end;margin-top:8px}.fert-use-row label{font-size:12px;margin:0;flex:1}.fert-use-row input{margin-top:4px;padding:9px;min-width:0}.fert-remaining{font-weight:800;color:#08734f}.fert-log{font-size:12px;color:#64746c;margin-top:5px}
+
+
+.manual-weather-card{padding:11px 13px!important;margin-top:0!important;margin-bottom:12px!important;border-radius:16px!important;box-shadow:0 4px 14px rgba(20,75,45,.045)!important}
+.manual-weather-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.manual-weather-title span{font-size:10px;color:#08784f;background:#e5f5eb;border-radius:20px;padding:4px 7px;font-weight:800}
+.manual-weather-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end}
+.manual-weather-card label{font-size:10px;margin:4px 0}
+.manual-weather-card input{min-height:34px;padding:7px 9px;font-size:12px;border-radius:9px}
+.manual-weather-card .primary-small{font-size:11px;padding:10px 13px;border-radius:10px;min-height:36px;white-space:nowrap;align-self:end;margin:0!important}.manual-weather-card .save-eto-kc-wrap{display:flex;align-items:end}.manual-weather-card .manual-weather-note{grid-column:1/-1}@media(max-width:520px){.manual-weather-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.manual-weather-grid .save-eto-kc-wrap{grid-column:1/-1}.manual-weather-grid .save-eto-kc-wrap .primary-small{width:100%}}
+.manual-weather-note{font-size:10px;color:#718278;line-height:1.35;margin-top:6px}
+
+/* F3 modern visual refresh */
+:root{
+ --g:#08784f;--g2:#119565;--ink:#173b2b;--muted:#718278;
+ --line:#e0ebe3;--bg:#eef5f0;--pale:#e5f5eb;
+ --shadow:0 8px 24px rgba(20,75,45,.07);
+}
+html{scroll-behavior:smooth}
+body{background:linear-gradient(180deg,#edf6ef 0%,#f7faf7 45%,#edf5ef 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.app{max-width:480px;background:#f7faf7;box-shadow:0 0 40px rgba(18,61,37,.09)}
+.page{background:transparent}
+.topbar{padding:16px 18px;background:rgba(255,255,255,.94);border-bottom:1px solid rgba(218,233,222,.9);box-shadow:0 3px 14px rgba(24,65,42,.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.back,.mini-mark{border-radius:14px;transition:transform .18s ease,background .18s ease}
+.mini-mark{box-shadow:0 5px 12px rgba(8,120,79,.16)}
+.top-title{letter-spacing:-.25px}
+.content{padding:20px 16px 34px}
+h2{font-size:24px;letter-spacing:-.7px;font-weight:850}
+.intro,.row-meta,.water-status-note{line-height:1.6}
+.counter{padding:8px 12px;border:1px solid #d7eddf}
+.empty,.farm-card,.section-card,.action-card,.irrigation-entry,.water-card{
+ border-radius:20px;box-shadow:var(--shadow);border-color:#e2ece5;
+}
+.empty{padding:30px 20px}
+.empty-icon,.farm-icon,.action-ico{border-radius:17px;background:linear-gradient(145deg,#e3f7e9,#f2fbf4);color:var(--g)}
+.farm-card{padding:14px;transition:transform .18s ease,box-shadow .18s ease}
+.farm-card:active,.action-card:active{transform:scale(.985)}
+.farm-name{font-size:16px;letter-spacing:-.2px}
+.detail-actions{gap:11px}
+.action-card{padding:14px;gap:13px;min-height:78px;transition:transform .18s ease,border-color .18s ease}
+.action-card strong{font-size:14px;letter-spacing:-.15px}
+.action-card small{font-size:12px;line-height:1.5}
+.action-ico{width:46px;height:46px;box-shadow:inset 0 0 0 1px rgba(8,120,79,.05)}
+.section-card{padding:16px;margin:12px 0;background:rgba(255,255,255,.96)}
+.section-card h3{font-size:16px;letter-spacing:-.25px}
+.water-card{padding:19px;background:linear-gradient(145deg,#effff5,#dcf7e8);border-color:#ccebd8}
+.water-number{font-size:32px;letter-spacing:-1px}
+.tank-visual{height:10px;border-radius:99px;background:#d7e9de}
+.tank-fill{border-radius:99px}
+button{font-family:inherit;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+button:active{transform:scale(.98)}
+.add,.save,.primary-small,.start{background:linear-gradient(135deg,#0b8054,#16a06b);box-shadow:0 7px 15px rgba(8,120,79,.13)}
+.add,.save{border-radius:14px}
+.cancel,.secondary-small{border-radius:12px}
+input,select{border-color:#d6e4da;background:#fbfdfb;border-radius:13px;min-height:46px;font:inherit;font-size:14px}
+input:focus,select:focus{border-color:#18a16b;box-shadow:0 0 0 4px rgba(17,149,101,.10)}
+label{font-size:12px;letter-spacing:.05px;color:#345744}
+.modal{border-radius:26px;box-shadow:0 20px 70px rgba(0,0,0,.18)}
+.backdrop{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.stage-pill{white-space:nowrap}
+.water-stat{border-radius:15px;background:rgba(255,255,255,.78)}
+.water-stat strong{overflow-wrap:anywhere}
+.nutrient-table th{background:#eaf5ed}
+.fert-choice{border-radius:15px;background:#fff}
+.fert-choice:active{background:#f1faf4}
+.fert-slab-tab{border-radius:11px;padding:9px 10px}
+.fert-slab-tab.active{box-shadow:0 4px 10px rgba(36,107,69,.15)}
+.welcome{background:radial-gradient(circle at 85% 20%,rgba(87,202,136,.28),transparent 30%),linear-gradient(150deg,#103f2d 0%,#08784f 56%,#20a36a 100%)}
+.welcome .mark{border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.hero h1{font-size:40px;letter-spacing:-1.4px}
+.start{background:#fff;color:#08784f;box-shadow:0 10px 25px rgba(0,0,0,.13)}
+@media(min-width:600px){body{padding:18px 0}.app{border:1px solid #e0ebe3}}
+@media(max-width:360px){
+ .content{padding:16px 12px 28px}
+ .topbar{padding:14px 12px}
+ .water-stats{gap:7px}
+ .water-stat{padding:9px}
+ .water-stat strong{font-size:16px}
+}
+
+
+.water-card-compact{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px!important;margin-bottom:13px;min-height:108px}
+.water-compact-info{flex:1;min-width:0}.water-card-compact .water-number{font-size:25px;margin:3px 0;line-height:1.1}.water-card-compact .water-label{font-size:10px;letter-spacing:.4px}.water-card-compact .row-meta{font-size:10px;line-height:1.35}.water-card-compact .tank-visual{height:5px;margin:7px 0 4px;max-width:100%}.water-compact-meta{overflow-wrap:anywhere}
+/* Theme-matched animated 3D glass tank */
+.water-card-compact{min-height:190px;padding:17px 18px!important;gap:15px;background:radial-gradient(ellipse at 78% 90%,rgba(38,190,133,.13),transparent 45%),linear-gradient(145deg,#f3fff7,#dff5e8);}
+.tank3d-wrap{position:relative;flex:0 0 118px;width:118px;height:154px;display:flex;align-items:flex-end;justify-content:center;margin:0 3px 0 0;isolation:isolate}
+.tank3d-glow{position:absolute;bottom:3px;width:112px;height:22px;border-radius:50%;background:rgba(14,172,126,.18);filter:blur(9px);animation:tankGlow 3s ease-in-out infinite}
+.tank3d{position:relative;width:86px;height:133px;overflow:hidden;border:2px solid rgba(118,174,160,.88);border-top:5px solid #d5eee3;border-radius:19px 19px 15px 15px;background:linear-gradient(90deg,rgba(255,255,255,.75),rgba(201,231,221,.22) 24%,rgba(255,255,255,.38) 70%,rgba(119,166,155,.28));box-shadow:inset 7px 0 9px rgba(255,255,255,.75),inset -6px 0 10px rgba(28,91,77,.12),0 9px 15px rgba(5,98,68,.17);transform:perspective(350px) rotateY(-5deg)}
+.tank3d-rim{position:absolute;z-index:5;left:-3px;right:-3px;top:-5px;height:12px;border:2px solid #9ebfb3;border-radius:50%;background:linear-gradient(180deg,#fff,#bcd9ce);box-shadow:0 2px 4px rgba(20,80,61,.18)}
+.tank3d-water{position:absolute;left:0;right:0;bottom:0;height:0%;overflow:hidden;background:linear-gradient(90deg,#20a7d8 0%,#50d4f3 25%,#16a9dd 58%,#087fb5 100%);border-radius:8px 8px 12px 12px;transition:height 1s cubic-bezier(.2,.75,.25,1);box-shadow:inset 5px 0 9px rgba(255,255,255,.22),inset -5px 0 10px rgba(0,69,130,.16)}
+.tank3d-wave{position:absolute;top:-5px;left:-55%;width:210%;height:13px;border-radius:42%;background:rgba(180,248,255,.72);border-top:2px solid rgba(255,255,255,.95);animation:tankWave 4s linear infinite;box-shadow:0 0 8px rgba(130,239,255,.55)}
+.tank3d-wave-back{top:-2px;left:-45%;height:11px;opacity:.48;animation:tankWave 6s linear infinite reverse}
+.tank3d-glass-shine{position:absolute;z-index:3;top:9px;bottom:5px;left:8px;width:10px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.08));filter:blur(.3px);pointer-events:none}
+.tank3d-scale{position:absolute;z-index:4;right:7px;top:25px;bottom:10px;width:9px;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.88) 0 2px,transparent 2px 12px);opacity:.75}
+.tank3d-percent{position:absolute;z-index:6;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 5px rgba(0,57,91,.55);pointer-events:none}
+.tank3d-bubble{position:absolute;bottom:12px;width:4px;height:4px;border:1px solid rgba(255,255,255,.75);border-radius:50%;animation:tankBubble 3.5s ease-in infinite}.b1{left:28%;animation-delay:.4s}.b2{left:58%;width:3px;height:3px;animation-delay:1.7s}.b3{left:73%;animation-delay:2.4s}
+.tank3d-base{position:absolute;bottom:0;width:106px;height:15px;border-radius:50%;background:linear-gradient(180deg,#e8fff6,#8ebdaf 45%,#d7f0e5);border:1px solid #7fae9e;box-shadow:0 5px 8px rgba(10,105,74,.2),inset 0 2px 3px #fff}
+@keyframes tankWave{from{transform:translateX(0) rotate(0deg)}to{transform:translateX(35%) rotate(5deg)}}
+@keyframes tankBubble{0%{transform:translateY(0);opacity:0}20%{opacity:.8}100%{transform:translateY(-65px);opacity:0}}
+@keyframes tankGlow{0%,100%{opacity:.6;transform:scaleX(.9)}50%{opacity:1;transform:scaleX(1.08)}}
+@media(max-width:360px){.water-card-compact{padding:13px!important;gap:8px;min-height:170px}.tank3d-wrap{flex-basis:98px;width:98px;height:137px}.tank3d{width:72px;height:116px}.tank3d-base{width:91px}.water-card-compact .water-number{font-size:22px}}
+
+</style>
+</head>
+<body><div class="app">
+<section class="page active welcome" id="welcomePage">
+ <div class="welcome-brand"><div class="mark">🌿</div><div><div class="brand">FERTILE FIELDS</div><div class="tag">SMART FARMING COMPANION</div></div></div>
+ <div class="hero"><div class="eyebrow">Welcome</div><h1>Grow better.<br>Farm smarter.</h1><p>Keep your farms organized in one simple place.</p></div>
+ <div><button class="start" id="enterBtn">Get Started&nbsp; →</button><div class="welcome-foot">Fertile Fields · Made for farmers</div></div>
+</section>
+<section class="page" id="farmsPage">
+ <div class="topbar"><button class="back" id="backBtn" aria-label="Back">‹</button><div class="mini-mark">🌿</div><div><div class="top-title">FERTILE FIELDS</div><div class="top-sub">My Farms</div></div></div>
+ <div class="content"><div class="heading-row"><h2>My Farms</h2><span class="counter" id="farmCount">0 farms</span></div><p class="intro">Add and manage your farms. You can add more than one farm.</p><div id="farmArea"></div></div>
+
+</section>
+<section class="page" id="farmDetailPage">
+ <div class="topbar"><button class="back" id="detailBackBtn" aria-label="Back">‹</button><div class="mini-mark">🌿</div><div><div class="top-title" id="detailFarmName">Farm</div><div class="top-sub">Farm Dashboard</div></div></div>
+ <div class="content">
+  <div class="water-card water-card-compact">
+   <div class="water-compact-info">
+    <div class="water-label">WATER TANK LEVEL</div>
+    <div class="water-number" id="waterLitres">Tank not added</div>
+    <div id="waterCaption" class="row-meta">Add a water tank to see this farm's water level.</div>
+    <div class="tank-visual"><div class="tank-fill" id="waterFill"></div></div>
+    <div class="row-meta water-compact-meta" id="waterPercent">No tank data yet</div>
+   </div>
+   <div class="tank3d-wrap" role="img" aria-label="Animated 3D water tank level">
+    <div class="tank3d-glow"></div>
+    <div class="tank3d">
+     <div class="tank3d-rim"></div>
+     <div class="tank3d-water" id="waterTankFill"><div class="tank3d-wave"></div><div class="tank3d-wave tank3d-wave-back"></div><span class="tank3d-bubble b1"></span><span class="tank3d-bubble b2"></span><span class="tank3d-bubble b3"></span></div>
+     <div class="tank3d-glass-shine"></div><div class="tank3d-scale"></div>
+     <div class="tank3d-percent" id="waterTankPercent">—%</div>
+    </div><div class="tank3d-base"></div>
+   </div>
+  </div>
+  <div class="section-card manual-weather-card">
+   <div class="manual-weather-title"><strong>Average ETo after past irrigation</strong><span>Manual Entry</span></div>
+   <div class="manual-weather-grid">
+    <div><label for="manualEto">Average ETo (mm/day)</label><input id="manualEto" type="number" min="0" step="0.01" placeholder="उदा. 5.5" inputmode="decimal"></div>
+    <div class="save-eto-kc-wrap"><button type="button" class="primary-small" id="saveManualEtoKc">💾 Save ETo</button></div>
+    <div class="manual-weather-note">मागील irrigation नंतरचा Average ETo भरा आणि Save करा. Kc हा Line Distance व Pruning Date वरून आपोआप calculate होईल.</div>
+    <div id="manualWeatherStatus" class="manual-weather-note" aria-live="polite"></div>
+   </div>
+  </div>
+  <div class="section-card" id="avgTempCard" style="padding:10px 12px;margin-top:-3px;border-radius:14px;box-shadow:0 3px 12px rgba(20,75,45,.04)">
+   <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+    <div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:800;color:var(--g)">🌡️ Average Temperature Since Irrigation</div><div id="avgTempValue" style="font-size:19px;font-weight:850;color:var(--text);margin-top:2px">— °C</div><div id="avgTempMeta" style="font-size:10px;line-height:1.4;color:var(--muted)">शेवटच्या irrigation पासून आजपर्यंतचा average तपासण्यासाठी लोकेशन शोधा.</div></div>
+    <button type="button" class="primary-small" id="detectLocationBtn" style="font-size:11px;padding:9px 11px;min-height:34px;white-space:nowrap">📍 Detect Location</button>
+   </div>
+   <div id="locationStatus" style="font-size:10px;line-height:1.4;color:var(--muted);margin-top:5px" aria-live="polite"></div>
+  </div>
+  <div class="detail-actions">
+   <button class="action-card" id="sprayOpen"><span class="action-ico">🗓️</span><span><strong>Spray Schedule</strong><small>Add, edit or remove spray entries for this farm.</small></span></button>
+   <button class="action-card" id="tankOpen"><span class="action-ico">💧</span><span><strong>Water Tank</strong><small>Add or update the tank calculation for this farm.</small></span></button>
+   <button class="action-card" id="irrigationOpen"><span class="action-ico">🚿</span><span><strong>Irrigation &amp; Fertigation</strong><small>पाणी आणि प्रत्येक वेळी दिलेल्या खतांची नोंद.</small></span></button>
+   <button class="action-card" id="soilOpen"><span class="action-ico">🧪</span><span><strong>Soil Report</strong><small>Enter and save soil test nutrient values for this farm.</small></span></button>
+   <button class="action-card" id="petioleOpen"><span class="action-ico">🍃</span><span><strong>Petiole Report</strong><small>Enter and save petiole nutrient values for this farm.</small></span></button>
+   <button class="action-card" id="fertigationOpen"><span class="action-ico">🧮</span><span><strong>Fertilizers</strong><small>खतांची शिफारस, नोंद आणि शिल्लक मात्रा व्यवस्थापन.</small></span></button>
+  </div>
+</section>
+<section class="page" id="sprayPage">
+ <div class="topbar"><button class="back" id="sprayPageBack" aria-label="Back">‹</button><div class="mini-mark">🗓️</div><div><div class="top-title">Spray Schedule</div><div class="top-sub" id="sprayFarmName">Farm schedule</div></div></div>
+ <div class="content"><div class="section-card"><h3>Sprays by Date</h3><p class="row-meta">Each entry belongs only to the selected farm.</p><button class="primary-small" id="addSprayBtn">＋ Add Spray</button><div id="sprayList" style="margin-top:12px"></div></div></div>
+</section>
+<section class="page" id="tankPage">
+ <div class="topbar"><button class="back" id="tankPageBack" aria-label="Back">‹</button><div class="mini-mark">💧</div><div><div class="top-title">Water Tank</div><div class="top-sub" id="tankFarmName">Farm tank calculation</div></div></div>
+ <div class="content">
+  <div class="section-card" id="savedTankCard">
+   <h3>Previous Tank Calculation</h3>
+   <div id="tankResults" style="margin-top:14px"></div>
+   <button class="primary-small" id="updateTankBtn" style="margin-top:14px">Update Tank</button>
+   <div id="tankHistory" style="margin-top:14px"></div>
+  </div>
+  <div class="section-card" id="tankFormCard">
+   <h3 id="tankFormHeading">Add Water Tank</h3>
+   <p class="row-meta" style="margin:0 0 12px">मागील माहिती बदलायची नसेल तर पुन्हा भरू नका. Update Tank दाबल्यावरच माहिती एडिट करा.</p>
+   <form id="tankForm">
+    <div class="form-grid">
+     <div><label for="tDepth">Depth (m) *</label><input id="tDepth" type="number" step="0.01" min="0.01" required></div>
+     <div><label for="tWidth">Width (m) *</label><input id="tWidth" type="number" step="0.01" min="0.01" required></div>
+     <div><label for="tRetention">Retention *</label><input id="tRetention" type="number" step="0.01" min="0.01" required></div>
+     <div><label for="tDrip">Drip (LTR) *</label><input id="tDrip" type="number" step="0.01" min="0.01" required></div>
+     <div><label for="tDripDist">Drip Distance (ft) *</label><input id="tDripDist" type="number" step="0.01" min="0.01" required></div>
+     <div><label for="tLineDist">Line Distance (ft) *</label><input id="tLineDist" type="number" step="0.01" min="0.01" required></div>
+     <div class="full"><label for="tWash">Add Washing Fraction?</label><select id="tWash"><option value="Yes">Yes (+20%)</option><option value="No">No</option></select></div>
+    </div>
+    <div class="actions"><button type="button" class="cancel" id="cancelTankBtn">Cancel</button><button class="save" type="submit">Calculate & Save Tank</button></div>
+   </form>
+  </div>
+ </div>
+</section>
+<section class="page" id="irrigationPage">
+ <div class="topbar"><button class="back" id="irrigationPageBack" aria-label="Back">‹</button><div class="mini-mark">🚿</div><div><div class="top-title">Irrigation &amp; Fertigation</div><div class="top-sub" id="irrigationFarmName">Farm irrigation log</div></div></div>
+ <div class="content">
+  <div class="section-card"><h3>＋ Add Irrigation Record</h3><p class="row-meta">पाणी दिल्याची तारीख आणि त्या वेळी वापरलेला Root Zone पर्याय निवडा.</p>
+   <form id="irrigationForm">
+    <label for="irrigationDate">Irrigation Date *</label><input id="irrigationDate" type="date" required>
+    <label for="irrigationStage">Root Zone / Irrigation Stage *</label><select id="irrigationStage" required><option value="30">30% Root Zone</option><option value="40">40% Root Zone</option><option value="50">50% Root Zone</option></select>
+    <label for="irrigationNote">Notes (optional)</label><input id="irrigationNote" maxlength="160" placeholder="Optional note">
+    <div class="actions"><button type="button" class="cancel" id="cancelIrrigationBtn">Cancel</button><button type="submit" class="save">Save Irrigation</button></div>
+   </form>
+  </div>
+  <div class="section-card"><h3>＋ Add Fertilizer for This Irrigation</h3><p class="row-meta">शिफारस केलेल्या खतांपुरते मर्यादित नाही. लिस्टमधील कोणतेही खत निवडा; दिलेली मात्रा नोंदवली जाईल.</p><label for="irrigationFertGrade">Fertilizer Grade</label><select id="irrigationFertGrade"><option value="">खत निवडा</option></select><label for="irrigationFertQty">या पाण्यात दिलेली मात्रा (kg) *</label><input id="irrigationFertQty" type="number" min="0.01" step="any" placeholder="उदा. 25"><button type="button" class="secondary-small" id="openIrrigationCustomGradeBtn" style="margin-top:8px">＋ Add Fertilizer Grade</button><div id="irrigationCustomGradePanel" class="section-card" style="display:none;margin-top:10px"><h3>Add Fertilizer Grade</h3><label for="irCustomName">Grade Name</label><input id="irCustomName" maxlength="60" placeholder="e.g. NPK 08:24:32 + Ca + Mg"><div class="grid-2"><div><label for="irCustomN">N %</label><input id="irCustomN" type="number" min="0" max="100" step="any" value="0"></div><div><label for="irCustomP">P₂O₅ %</label><input id="irCustomP" type="number" min="0" max="100" step="any" value="0"></div><div><label for="irCustomK">K₂O %</label><input id="irCustomK" type="number" min="0" max="100" step="any" value="0"></div><div><label for="irCustomCa">Ca % (elemental)</label><input id="irCustomCa" type="number" min="0" max="100" step="any" value="0"></div><div><label for="irCustomMg">Mg % (elemental)</label><input id="irCustomMg" type="number" min="0" max="100" step="any" value="0"></div></div><button type="button" class="primary-small" id="saveIrrigationCustomGradeBtn">Save Grade</button><button type="button" class="secondary-small" id="cancelIrrigationCustomGradeBtn">Cancel</button><div id="irCustomGradeStatus" class="row-meta"></div></div><button type="button" class="save" id="logIrrigationFertBtn" style="margin-top:10px;width:100%">Save Fertigation Entry</button><div id="irrigationFertStatus" class="water-status-note"></div></div>
+  <div class="section-card"><h3>Irrigation History</h3><div id="irrigationHistory"></div></div><div class="section-card"><h3>Fertigation History</h3><div id="irrigationFertHistory"></div></div>
+  <div class="section-card"><h3>Water Estimate</h3>
+   <p class="water-status-note">Dashboard वर भरलेले manual ETo आणि Kc वापरून अंदाज मोजला जाईल.</p>
+   <label for="nextMoistureTarget">पुढील पाणी किती % Root Zone Moisture ला द्यायचे?</label>
+   <select id="nextMoistureTarget"><option value="30">30% Moisture</option><option value="40" selected>40% Moisture</option><option value="50">50% Moisture</option></select>
+   <div id="irrigationEstimate" class="row-meta" style="margin-top:12px">Tank calculation सेव्ह करा, ETo/Kc भरा आणि irrigation नोंद जोड़.</div>
+  </div>
+ </div>
+</section>
+<section class="page" id="soilPage">
+ <div class="topbar"><button class="back" id="soilPageBack" aria-label="Back">‹</button><div class="mini-mark">🧪</div><div><div class="top-title">Soil Report</div><div class="top-sub" id="soilFarmName">Farm soil report</div></div></div>
+ <div class="content">
+  <div class="section-card"><h3>Saved Soil Report</h3><div id="soilCurrent"></div><button type="button" class="primary-small" id="updateSoilBtn" style="margin-top:12px">Update Soil Report</button></div>
+  <div class="section-card" id="soilFormCard"><h3 id="soilFormHeading">Add Soil Report</h3><p class="row-meta">मातीच्या रिपोर्टमध्ये दिलेली मूल्ये मॅन्युअली भरा. प्रत्येक फार्मचा रिपोर्ट स्वतंत्र सेव्ह होईल.</p>
+   <form id="soilForm"><div class="form-grid">
+    <div><label for="soilN">Nitrogen (N)</label><input id="soilN" type="number" step="any" placeholder="N value"></div><div><label for="soilP">Phosphorus (P)</label><input id="soilP" type="number" step="any" placeholder="P value"></div>
+    <div><label for="soilK">Potassium (K)</label><input id="soilK" type="number" step="any" placeholder="K value"></div><div><label for="soilCa">Calcium (Ca)</label><input id="soilCa" type="number" step="any" placeholder="Ca value"></div>
+    <div><label for="soilMg">Magnesium (Mg)</label><input id="soilMg" type="number" step="any" placeholder="Mg value"></div><div><label for="soilNa">Sodium (Na)</label><input id="soilNa" type="number" step="any" placeholder="Na value"></div><div><label for="soilBulkDensity">Bulk Density</label><input id="soilBulkDensity" type="number" step="any" placeholder="e.g. 1.4"></div><div><label for="soilCEC">CEC</label><input id="soilCEC" type="number" step="any" placeholder="e.g. 37"></div>
+   </div><label for="soilUnit">Report unit (optional)</label><input id="soilUnit" maxlength="40" placeholder="e.g. ppm, mg/kg, meq/100g"><div class="actions"><button type="button" class="cancel" id="cancelSoilBtn">Cancel</button><button type="submit" class="save">Save Soil Report</button></div></form>
+  </div><div class="section-card"><h3>Previous Soil Reports</h3><div id="soilHistory"></div></div>
+ </div>
+</section>
+<section class="page" id="petiolePage">
+ <div class="topbar"><button class="back" id="petiolePageBack" aria-label="Back">‹</button><div class="mini-mark">🍃</div><div><div class="top-title">Petiole Report</div><div class="top-sub" id="petioleFarmName">Farm petiole report</div></div></div>
+ <div class="content">
+  <div class="section-card"><h3>Saved Petiole Report</h3><div id="petioleCurrent"></div><button type="button" class="primary-small" id="updatePetioleBtn" style="margin-top:12px">Update Petiole Report</button></div>
+  <div class="section-card" id="petioleFormCard"><h3 id="petioleFormHeading">Add Petiole Report</h3><p class="row-meta">पेटिओल रिपोर्टवरील मूल्ये मॅन्युअली भरा. प्रत्येक फार्मचा रिपोर्ट स्वतंत्र सेव्ह होईल.</p>
+   <form id="petioleForm"><div class="form-grid">
+    <div><label for="petN">Nitrogen (N)</label><input id="petN" type="number" step="any" placeholder="N value"></div><div><label for="petP">Phosphorus (P)</label><input id="petP" type="number" step="any" placeholder="P value"></div>
+    <div><label for="petK">Potassium (K)</label><input id="petK" type="number" step="any" placeholder="K value"></div><div><label for="petCa">Calcium (Ca)</label><input id="petCa" type="number" step="any" placeholder="Ca value"></div>
+    <div><label for="petMg">Magnesium (Mg)</label><input id="petMg" type="number" step="any" placeholder="Mg value"></div><div><label for="petFe">Ferrous / Iron (Fe)</label><input id="petFe" type="number" step="any" placeholder="Fe value"></div>
+    <div><label for="petAmmonium">Ammonium</label><input id="petAmmonium" type="number" step="any" placeholder="Ammonium value"></div><div><label for="petMo">Molybdenum (Mo)</label><input id="petMo" type="number" step="any" placeholder="Mo value"></div>
+    <div><label for="petB">Boron (B)</label><input id="petB" type="number" step="any" placeholder="B value"></div><div><label for="petMn">Manganese (Mn)</label><input id="petMn" type="number" step="any" placeholder="Mn value"></div>
+   </div><label for="petSlab">Petiole Day Slab *</label><select id="petSlab"><option value="20-50">20–50 days</option><option value="50-90">50–90 days</option><option value="90-120">90–120 days</option></select><label for="petioleUnit">Report unit (optional)</label><input id="petioleUnit" maxlength="40" placeholder="e.g. %, ppm, mg/kg"><div class="actions"><button type="button" class="cancel" id="cancelPetioleBtn">Cancel</button><button type="submit" class="save">Save Petiole Report</button></div></form>
+  </div><div class="section-card"><h3>Previous Petiole Reports</h3><div id="petioleHistory"></div></div>
+ </div>
+</section>
+<section class="page" id="fertigationPage">
+ <div class="topbar"><button class="back" id="fertigationPageBack" aria-label="Back">‹</button><div class="mini-mark">🧮</div><div><div class="top-title">Fertilizer Recommendations</div><div class="top-sub" id="fertigationFarmName">Farm nutrition calculation</div></div></div>
+ <div class="content">
+  <div class="section-card" style="display:none"><h3>Required Nutrition — Elemental Form (per acre)</h3><div id="recPrereq" class="water-status-note"></div><div id="recOutput"><p class="row-meta">आधी Soil Report आणि Petiole Report सेव्ह करा.</p></div></div>
+ <div class="section-card" id="fertilizerPickerCard" style="display:none"><h3>Set Fertilizer Grades</h3><p class="row-meta">F3 App प्रमाणे शोधा आणि खताच्या बाजूला + Add दाबा. प्रत्येक निवडीनंतर पूर्ण झालेल्या element ची खते यादीतून आपोआप कमी होतील.</p><div class="fert-search-wrap"><input id="fertilizerSearch" type="search" placeholder="🔎 खत किंवा ग्रेड शोधा..." autocomplete="off"></div><div id="fertilizerChoices"></div><button type="button" class="secondary-small" id="openCustomGradeBtn" style="margin:8px 0">＋ Add New Fertilizer Grade</button><div id="customGradePanel" class="section-card" style="display:none;margin:8px 0"><h3>Add Fertilizer Grade</h3><label for="customGradeName">Grade name</label><input id="customGradeName" maxlength="60" placeholder="e.g. NPK 08:24:32 + Ca + Mg"><div class="grid-2"><div><label for="customN">N %</label><input id="customN" type="number" min="0" max="100" step="any" value="0"></div><div><label for="customP">P₂O₅ %</label><input id="customP" type="number" min="0" max="100" step="any" value="0"></div><div><label for="customK">K₂O %</label><input id="customK" type="number" min="0" max="100" step="any" value="0"></div><div><label for="customCa">Ca % (elemental)</label><input id="customCa" type="number" min="0" max="100" step="any" value="0"></div><div><label for="customMg">Mg % (elemental)</label><input id="customMg" type="number" min="0" max="100" step="any" value="0"></div></div><p class="row-meta">P साठी P₂O₅ आणि K साठी K₂O टक्केवारी भरा; Ca/Mg elemental टक्केवारी आहेत.</p><button type="button" class="primary-small" id="saveCustomGradeBtn">Save Grade</button><button type="button" class="secondary-small" id="cancelCustomGradeBtn">Cancel</button><div id="customGradeStatus" class="row-meta"></div></div><div id="workingFertilizers"></div><button class="primary-small" id="saveFertilizersBtn" style="margin-top:12px;width:100%">Save Fertilizer Set</button><button class="secondary-small" id="cancelFertilizerEditBtn" style="margin-top:8px;width:100%">Cancel Edit</button><div id="fertSetStatus" class="water-status-note"></div></div>
+ <div class="section-card"><h3 style="margin-bottom:8px">Saved Fertilizer Slabs</h3><div id="fertilizerSlabTabs" class="fert-slab-tabs"></div><div id="savedSlabLabel" class="row-meta"></div><div id="savedRequiredElements"></div><div id="savedFertilizers"></div><button class="secondary-small" id="editFertilizersBtn" style="margin-top:10px">Edit Fertilizers</button></div>
+ </div>
+</section>
+</div>
+<div class="backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal">
+ <div class="modal-head"><h2 id="modalTitle">Add Farm</h2><button type="button" class="close" id="closeBtn" aria-label="Close">×</button></div>
+ <form id="farmForm">
+  <label for="farmName">Farm Name *</label><input id="farmName" required maxlength="60" placeholder="e.g. Main Vineyard">
+  <label for="farmAcres">Farm Area (acres) *</label><input id="farmAcres" type="number" min="0.01" step="0.01" required placeholder="e.g. 2.5">
+  <label for="variety">Grape Variety *</label><select id="variety" required><option value="">Select variety</option><option>Thompson Seedless</option><option>Sonaka</option><option>Manik Chaman</option><option>Flame Seedless</option><option>Sharad Seedless</option><option>Crimson Seedless</option><option>Allison</option><option>Other</option></select>
+  <label for="pruningDate">Pruning Date *</label><input id="pruningDate" type="date" required>
+  <div class="actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="submit" class="save">Save Farm</button></div>
+  <div class="form-note">Only these four details are collected at this stage.</div>
+ </form></div></div>
+
+<div class="backdrop" id="sprayBackdrop" role="dialog" aria-modal="true" aria-labelledby="sprayModalTitle"><div class="modal">
+ <div class="modal-head"><h2 id="sprayModalTitle">Add Spray</h2><button type="button" class="close" id="sprayCloseBtn">×</button></div>
+ <form id="sprayForm">
+  <label for="sprayDate">Spray Date *</label><input id="sprayDate" type="date" required>
+  <label for="sprayName">Spray / Product Name *</label><input id="sprayName" required maxlength="100" placeholder="Enter spray or product name">
+  <label for="sprayDose">Dose / Details</label><input id="sprayDose" maxlength="160" placeholder="Dose, water volume, notes">
+  <div class="actions"><button type="button" class="cancel" id="sprayCancelBtn">Cancel</button><button type="submit" class="save">Save Spray</button></div>
+ </form>
+</div></div>
+
+<div class="backdrop" id="fertigationEditBackdrop" role="dialog" aria-modal="true" aria-labelledby="fertigationEditTitle"><div class="modal"><div class="modal-head"><h2 id="fertigationEditTitle">Edit Fertigation Entry</h2><button class="close" type="button" id="closeFertigationEdit">×</button></div><label for="editFertGrade">Fertilizer Grade</label><select id="editFertGrade"></select><label for="editFertDate">Date</label><input type="date" id="editFertDate"><label for="editFertQty">Quantity given (kg)</label><input type="number" id="editFertQty" min="0.01" step="any"><div class="actions"><button type="button" class="cancel" id="removeFertEntry">Remove Entry</button><button type="button" class="save" id="saveFertEntryEdit">Save Changes</button></div><div class="form-note">नोंद बदलल्यावर Fertilizer Recommendations मधील शिल्लक मात्रा पुन्हा मोजली जाईल.</div></div></div>
+<script>
+const $=id=>document.getElementById(id);let farms=[],activeFarmId=null,editingSprayId=null,editingFarmId=null;
+try{farms=JSON.parse(localStorage.getItem('fertileFieldsFarmListV1')||'[]');if(!Array.isArray(farms))farms=[];}catch(e){farms=[];}
+farms=farms.map((f,i)=>({...f,id:f.id||('farm_'+Date.now()+'_'+i),tank:f.tank||null,tankHistory:f.tankHistory||[],sprays:f.sprays||[],irrigationLogs:f.irrigationLogs||[],latitude:f.latitude??null,longitude:f.longitude??null}));
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function showPage(which){['welcomePage','farmsPage','farmDetailPage','sprayPage','tankPage','irrigationPage','soilPage','petiolePage','fertigationPage'].forEach(id=>$(id).classList.remove('active'));const map={welcome:'welcomePage',farms:'farmsPage',detail:'farmDetailPage',spray:'sprayPage',tank:'tankPage',irrigation:'irrigationPage',soil:'soilPage',petiole:'petiolePage',fertigation:'fertigationPage'};$(map[which]||'farmDetailPage').classList.add('active');window.scrollTo(0,0);}
+function save(){try{localStorage.setItem('fertileFieldsFarmListV1',JSON.stringify(farms));return true;}catch(e){console.error('Fertile Fields save failed:',e);return false;}}
+function openModal(){$('modalTitle').textContent='Add Farm';$('farmForm').querySelector('.save').textContent='Save Farm';editingFarmId=null;$('farmForm').reset();$('backdrop').classList.add('show');setTimeout(()=>$('farmName').focus(),80);}
+function openEditFarm(id){const f=farms.find(x=>x.id===id);if(!f)return;editingFarmId=id;$('modalTitle').textContent='Edit Plot Details';$('farmForm').querySelector('.save').textContent='Save Changes';$('farmName').value=f.name||'';$('farmAcres').value=f.acres||'';$('variety').value=f.variety||'';$('pruningDate').value=f.pruningDate||'';$('backdrop').classList.add('show');setTimeout(()=>$('farmName').focus(),80);}
+function closeModal(){$('backdrop').classList.remove('show');$('farmForm').reset();editingFarmId=null;}
+function render(){
+ $('farmCount').textContent=`${farms.length} ${farms.length===1?'farm':'farms'}`;
+ const area=$('farmArea');
+ if(!farms.length){area.innerHTML='<div class="empty"><div class="empty-icon">🌱</div><h3>No farms added yet</h3><p>Add your first farm to get started.</p><button class="add" id="addFirst">＋ &nbsp; Add Farm</button></div>';$('addFirst').onclick=openModal;}
+ else {area.innerHTML='<div class="farm-list">'+farms.map((f,i)=>`<article class="farm-card" data-openfarm="${esc(f.id)}" style="cursor:pointer"><div class="farm-icon">🌿</div><div class="farm-info"><div class="farm-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span>${esc(f.name)}</span><button type="button" class="secondary-small" data-edit-farm="${esc(f.id)}" aria-label="Edit ${esc(f.name)}" style="padding:5px 10px;font-size:12px;line-height:1.2;flex-shrink:0">✎ Edit</button></div><div class="farm-details">${esc(f.acres)} acre${Number(f.acres)===1?'':'s'} · ${esc(f.variety)}<br>Pruning: ${esc(f.pruningDate)}<br><span style="color:var(--g);font-weight:700">Tap to open farm →</span></div></div><button class="remove" data-remove="${i}">Remove</button></article>`).join('')+'<button class="add" id="addMore">＋ &nbsp; Add Another Farm</button></div>';
+ $('addMore').onclick=openModal;area.querySelectorAll('[data-edit-farm]').forEach(b=>b.onclick=e=>{e.stopPropagation();openEditFarm(b.dataset.editFarm);});area.querySelectorAll('[data-openfarm]').forEach(card=>card.onclick=e=>{if(e.target.closest('[data-remove]'))return;openFarm(card.dataset.openfarm);});area.querySelectorAll('[data-remove]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(confirm('Remove this farm and its saved farm-specific data?')){farms.splice(+b.dataset.remove,1);save();render();}});}
+}
+function currentFarm(){return farms.find(f=>f.id===activeFarmId);}
+function openFarm(id){activeFarmId=id;const f=currentFarm();if(!f)return;$('detailFarmName').textContent=f.name;$('manualEto').value=f.manualEto??'';renderAvgTempStatus(f);const cropDaysForKc=f.pruningDate?Math.floor((new Date(localDate()+'T12:00:00')-new Date(f.pruningDate+'T12:00:00'))/86400000):null;const autoKcInfo=f.tank&&cropDaysForKc!==null?kcForDays(cropDaysForKc,f.tank.lineDist):{kc:null};showPage('detail');renderWater();} 
+function openSprayPage(){const f=currentFarm();if(!f)return;$('sprayFarmName').textContent=f.name;showPage('spray');renderSprays();}
+function openTankPage(){const f=currentFarm();if(!f)return;$('tankFarmName').textContent=f.name;showPage('tank');renderTankPage();}
+function localDate(d=new Date()){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+// TEMPORARY grape Kc curve by days after pruning. Replace with user's verified values later.
+function kcForDays(days,lineDistance){
+ const spacing=Number(lineDistance);
+ if(!Number.isFinite(days)||days<0)return {kc:null,stage:'Pruning date missing / future',daysAfterPruning:days};
+ const spacingKey=Math.round(spacing);
+ const matrix={
+  7:{initial:[.38,.42],development:.90,mid:[.90,1.15],late:[.60,.65]},
+  8:{initial:[.35,.40],development:.85,mid:[.85,1.10],late:[.55,.60]},
+  9:{initial:[.33,.38],development:.80,mid:[.80,1.00],late:[.50,.55]},
+  10:{initial:[.30,.35],development:.75,mid:[.75,.90],late:[.45,.50]},
+  11:{initial:[.28,.32],development:.70,mid:[.70,.85],late:[.40,.45]}
+ };
+ if(!matrix[spacingKey])return {kc:null,stage:'Line distance must be 7, 8, 9, 10 or 11 ft',daysAfterPruning:days};
+ const m=matrix[spacingKey]; let kc,stage;
+ if(days<=20){kc=(m.initial[0]+m.initial[1])/2;stage='Initial stage (Days 1–20)';}
+ else if(days<=55){const initial=(m.initial[0]+m.initial[1])/2;const frac=(days-20)/(55-20);kc=initial+(m.development-initial)*frac;stage='Development stage (Days 21–55)';}
+ else if(days<=105){kc=(m.mid[0]+m.mid[1])/2;stage='Mid-season stage (Days 56–105)';}
+ else if(days<=130){kc=(m.late[0]+m.late[1])/2;stage='Late-season stage (Days 106–130)';}
+ else {kc=(m.late[0]+m.late[1])/2;stage='Beyond 130-day reference cycle (late-season value held)';}
+ return {kc,stage,daysAfterPruning:days,lineDistance:spacingKey,source:'spacing-matrix'};
+}
+function rootZoneForStage(t,stage){const slab=(t.slabs||[]).find(x=>String(x.label).includes(String(stage)+'%'));return slab?Number(slab.water):null;}
+function setWaterVisual(pct){const n=Math.max(0,Math.min(100,Number(pct)||0));const bar=$('waterFill'),tank=$('waterTankFill'),label=$('waterTankPercent');if(bar)bar.style.width=n+'%';if(tank)tank.style.height=n+'%';if(label)label.textContent=Math.round(n)+'%';}
+function renderWater(){const f=currentFarm();if(!f)return;const t=f.tank;const logs=(f.irrigationLogs||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+ if(!t){$('waterLitres').textContent='Tank not added';$('waterCaption').textContent='Add a water tank before estimating water remaining.';setWaterVisual(0);$('waterPercent').textContent='No tank data yet';return;}
+ if(!logs.length){$('waterLitres').textContent='Irrigation not logged';$('waterCaption').textContent='Add irrigation date and Root Zone stage to start estimate.';setWaterVisual(0);$('waterPercent').textContent='No irrigation record yet';return;}
+ const last=logs[0],target=Number($('nextMoistureTarget')?.value||40),targetSlab=(t.slabs||[]).find(x=>String(x.label).includes(String(target)+'%'));
+ if(!targetSlab||!Number.isFinite(Number(targetSlab.val))||Number(targetSlab.val)<=0){$('waterLitres').textContent='Check tank result';$('waterCaption').textContent=`Root Zone at ${target}% result missing. Update Water Tank calculation.`;setWaterVisual(0);$('waterPercent').textContent='Tank calculation needs checking';return;}
+ $('waterLitres').textContent='Calculating…';$('waterCaption').textContent=`शिल्लक Root Zone Moisture · पुढील सिंचनासाठी target ${target}%`;setWaterVisual(0);$('waterPercent').textContent='ETo आणि दिवसांनुसार शिल्लक मोजत आहे…';
+ const prune=f.pruningDate;const cropDays=prune?Math.floor((new Date(localDate()+'T12:00:00')-new Date(prune+'T12:00:00'))/86400000):null;const kc=prune?kcForDays(cropDays,t.lineDist):{kc:null,stage:'Pruning date missing'};
+ estimateWaterLevel(f,last,Number(targetSlab.val),0,kc,target).then(r=>{if(currentFarm()?.id!==f.id)return;const pct=Math.max(0,Math.min(100,r.remainingPercent));$('waterLitres').textContent=`${pct.toFixed(1)}%`;$('waterCaption').textContent=`Root Zone at ${target}% पैकी अंदाजित शिल्लक पाणी`;$('waterPercent').innerHTML=`ETo: ${r.eto.toFixed(2)} mm/day · Automatic Kc: ${r.kc.toFixed(2)} · Line spacing: ${r.lineDistance} ft · ${esc(r.kcStage)} · ${r.days} days after irrigation`;requestAnimationFrame(()=>setWaterVisual(pct));}).catch(e=>{$('waterLitres').textContent='—';$('waterCaption').textContent=`Root Zone शिल्लक मोजता आली नाही · Target ${target}%`;$('waterPercent').textContent=`ETo/weather data unavailable — ${e&&e.message?e.message:''}`;setWaterVisual(0);});
+}
+async function estimateWaterLevel(f,last,rootZoneValue,days,kc,targetStage=40){
+ if(!f.pruningDate)throw new Error('आधी Farm Details मध्ये pruning date सेव्ह करा.');
+ const eto=Number(f.manualEto);
+ if(!Number.isFinite(eto)||eto<0)throw new Error('Dashboard वर manual ETo (mm/day) भरा.');
+ const lineDistance=Number(f.tank?.lineDist);
+ const cropDays=Math.floor((new Date(localDate()+'T12:00:00')-new Date(f.pruningDate+'T12:00:00'))/86400000);
+ const kcInfo=kcForDays(cropDays,lineDistance);
+ if(!Number.isFinite(kcInfo.kc))throw new Error('Tank Calculation मध्ये Line Distance 7, 8, 9, 10 किंवा 11 ft असणे आवश्यक आहे. योग्य spacing सेव्ह करा.');
+ const totalRootZone=Number(f.tank?.totalTank);
+ if(!Number.isFinite(totalRootZone)||totalRootZone<=0)throw new Error('Total Root Zone value उपलब्ध नाही. Water Tank पुन्हा सेव्ह करा.');
+ const daysSince=Math.max(0,Math.floor((new Date(localDate()+'T12:00:00')-new Date(last.date+'T12:00:00'))/86400000));
+ const cumulativeLoss=kcInfo.kc*eto*daysSince;
+ const remainingValue=Math.max(0,Number(rootZoneValue)-cumulativeLoss);
+ const remainingPercent=Number(rootZoneValue)>0?Math.max(0,Math.min(100,(remainingValue/Number(rootZoneValue))*100)):0;
+ return {remainingValue,remainingPercent,totalRootZone,kc:kcInfo.kc,kcStage:kcInfo.stage,cropDays,eto,lineDistance,latitude:null,longitude:null,cumulativeLoss,days:daysSince,usedDays:daysSince,source:'automatic-spacing-kc',targetStage,rootZoneValue};
+}
+function renderSprays(){const f=currentFarm();if(!f)return;const list=$('sprayList');if(!f.sprays.length){list.innerHTML='<p class="row-meta">No sprays added for this farm yet.</p>';return;}list.innerHTML=f.sprays.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{const d=new Date(s.date+'T00:00:00');const dateLabel=isNaN(d)?esc(s.date):d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});return `<div class="spray-chart-row"><div class="spray-date-box">${dateLabel}<span>SPRAY DATE</span></div><div class="spray-entry"><strong>${esc(s.name)}</strong><div class="row-meta">${s.dose?esc(s.dose):'No dose/details added'}</div><div class="row-buttons" style="margin-top:8px"><button class="secondary-small" data-edit-spray="${esc(s.id)}">Edit</button><button class="secondary-small" data-delete-spray="${esc(s.id)}">Delete</button></div></div></div>`;}).join('');list.querySelectorAll('[data-edit-spray]').forEach(b=>b.onclick=()=>openSpray(b.dataset.editSpray));list.querySelectorAll('[data-delete-spray]').forEach(b=>b.onclick=()=>{if(confirm('Delete this spray entry?')){const f=currentFarm();f.sprays=f.sprays.filter(s=>s.id!==b.dataset.deleteSpray);save();renderSprays();}});}
+function openSpray(id=null){editingSprayId=id;const f=currentFarm();const s=id?f.sprays.find(x=>x.id===id):null;$('sprayModalTitle').textContent=s?'Edit Spray':'Add Spray';$('sprayDate').value=s?.date||new Date().toISOString().slice(0,10);$('sprayName').value=s?.name||'';$('sprayDose').value=s?.dose||'';$('sprayBackdrop').classList.add('show');}
+function openIrrigationPage(){const f=currentFarm();if(!f)return;$('irrigationFarmName').textContent=f.name;$('irrigationDate').value=localDate();$('irrigationNote').value='';showPage('irrigation');renderIrrigationHistory();renderIrrigationEstimate();renderIrrigationFertigation();}
+function renderIrrigationHistory(){const f=currentFarm();if(!f)return;const logs=(f.irrigationLogs||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));$('irrigationHistory').innerHTML=logs.length?logs.map(x=>`<div class="irrigation-entry"><div class="irrigation-entry-head"><strong>${esc(x.date)}</strong><span class="stage-pill">${esc(x.stage)}% Root Zone</span></div>${x.note?`<div class="row-meta">${esc(x.note)}</div>`:''}<div class="row-buttons" style="margin-top:9px"><button class="secondary-small" data-edit-irrigation="${esc(x.id)}">Edit</button><button class="secondary-small" data-delete-irrigation="${esc(x.id)}">Delete</button></div></div>`).join(''):'<p class="row-meta">अजून irrigation नोंदवलेले नाही.</p>';$('irrigationHistory').querySelectorAll('[data-edit-irrigation]').forEach(b=>b.onclick=()=>{const x=currentFarm().irrigationLogs.find(z=>z.id===b.dataset.editIrrigation);if(!x)return;$('irrigationDate').value=x.date;$('irrigationStage').value=x.stage;$('irrigationNote').value=x.note||'';$('irrigationForm').dataset.editId=x.id;$('irrigationForm').scrollIntoView({behavior:'smooth',block:'start'});});$('irrigationHistory').querySelectorAll('[data-delete-irrigation]').forEach(b=>b.onclick=()=>{if(confirm('ही irrigation नोंद delete करायची?')){const f=currentFarm();f.irrigationLogs=f.irrigationLogs.filter(x=>x.id!==b.dataset.deleteIrrigation);save();renderIrrigationHistory();renderWater();renderIrrigationEstimate();}});}
+async function renderIrrigationEstimate(){const f=currentFarm();if(!f)return;const logs=(f.irrigationLogs||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));const el=$('irrigationEstimate');if(!f.tank){el.textContent='आधी Water Tank calculation सेव्ह करा.';return;}if(!logs.length){el.textContent='पाण्याची नोंद करा आणि पुढील पाण्यासाठी 30%, 40% किंवा 50% Moisture target निवडा.';return;}const target=Number($('nextMoistureTarget')?.value||40),slab=(f.tank.slabs||[]).find(x=>String(x.label).includes(String(target)+'%'));if(!slab){el.textContent=`Root Zone at ${target}% उपलब्ध नाही. Water Tank पुन्हा calculate करा.`;return;}el.textContent=`सूत्र: Root Zone at ${target}% − (Kc × ETo) × irrigation नंतरचे दिवस. त्यातून Root Zone at ${target}% पैकी शिल्लक % मोजत आहे…`;const last=logs[0];const kc=f.pruningDate?kcForDays(Math.floor((new Date(localDate()+'T12:00:00')-new Date(f.pruningDate+'T12:00:00'))/86400000)):{kc:null,stage:'Pruning date missing'};try{const r=await estimateWaterLevel(f,last,Number(slab.val),0,kc,target);el.innerHTML=`<div class="water-stats"><div class="water-stat"><span>पुढील सिंचनासाठी target</span><strong>${target}% Moisture</strong></div><div class="water-stat"><span>Root Zone at ${target}%</span><strong>${Number(slab.val).toFixed(3)}</strong></div><div class="water-stat"><span>Root Zone at ${target}% पैकी शिल्लक</span><strong>${r.remainingPercent.toFixed(1)}%</strong></div><div class="water-stat"><span>शिल्लक Root Zone value</span><strong>${r.remainingValue.toFixed(3)} / ${Number(slab.val).toFixed(3)}</strong></div><div class="water-stat"><span>जमा झालेला Kc × ETo loss</span><strong>${r.cumulativeLoss.toFixed(3)}</strong></div><div class="water-stat"><span>गेलेले दिवस</span><strong>${r.days}</strong></div></div><div class="water-status-note">सूत्र: Root Zone at ${target}% − (Manual Kc × Manual ETo × दिवस) · शिल्लक % = शिल्लक Root Zone ÷ Root Zone at ${target}% × 100. शेवटचे सिंचन: ${esc(last.date)} · नोंदवलेला stage ${esc(last.stage)}%. ${esc(kc.stage)}.</div><div class="water-status-note">ही तुमच्या दिलेल्या सूत्रानुसार अंदाजित गणना आहे. Root Zone value आणि cumulative Kc × ETo यांची एकके मूळ Tank Excel शी जुळतात याची खात्री करा.</div>`;}catch(e){el.innerHTML=`<div class="water-status-note">ETo गणना उपलब्ध नाही. ${esc(e.message||'Weather unavailable')} · पुढील target ${target}% Root Zone.</div>`;const st=$('locationStatus');if(st)st.textContent=e.message||'Location/Weather data मिळाले नाही.';}}
+function renderAvgTempStatus(f){const value=$('avgTempValue'),meta=$('avgTempMeta'),status=$('locationStatus');if(!value||!meta)return;if(Number.isFinite(Number(f.avgTempSinceIrrigation))&&f.avgTempSinceIrrigation!==null){value.textContent=Number(f.avgTempSinceIrrigation).toFixed(1)+' °C';meta.textContent=`${f.avgTempStart||'—'} ते ${f.avgTempEnd||localDate()} · ${f.avgTempHours||0} hourly readings · अंदाजित हवामान डेटा`;}else{value.textContent='— °C';meta.textContent='शेवटच्या irrigation पासून आजपर्यंतचा average तपासण्यासाठी लोकेशन शोधा.';}if(status)status.textContent=f.latitude!=null&&f.longitude!=null?`लोकेशन सेव्ह आहे: ${Number(f.latitude).toFixed(5)}, ${Number(f.longitude).toFixed(5)}${f.locationAccuracy?` (±${Math.round(f.locationAccuracy)} m)`:''}`:'अजून लोकेशन detect केलेले नाही.';}
+
+// सुधारित आणि सुरक्षित लोकेशन व तापमान फेच फंक्शन
+async function detectFarmLocationAndAverageTemp(){
+ const f=currentFarm();
+ if(!f)return;
+ const btn=$('detectLocationBtn'),value=$('avgTempValue'),meta=$('avgTempMeta'),status=$('locationStatus');
+ 
+ if(!navigator.geolocation){
+  status.textContent='या browser मध्ये GPS उपलब्ध नाही.';
+  return;
+ }
+ 
+ btn.disabled=true;
+ btn.textContent='Locating…';
+ status.textContent='फोनची location permission घेत आहे…';
+
+ try {
+  const pos=await new Promise((resolve,reject)=>{
+   navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  });
+
+  f.latitude=pos.coords.latitude;
+  f.longitude=pos.coords.longitude;
+  f.locationAccuracy=pos.coords.accuracy;
+  save();
+
+  status.textContent=`लोकेशन मिळाले. तापमान डेटा तपासत आहे…`;
+  
+  const logs=(f.irrigationLogs||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  if(!logs.length)throw new Error('या फार्ममध्ये Irrigation Date सेव्ह नाही. आधी irrigation नोंद जोडा.');
+  
+  const start=logs[0].date;
+  const end=localDate();
+  if(start>end)throw new Error('Irrigation date भविष्यातील आहे.');
+
+  meta.textContent=`${start} ते ${end} दरम्यान तापमान घेत आहे…`;
+  
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${f.latitude}&longitude=${f.longitude}&hourly=temperature_2m&start_date=${start}&end_date=${end}&timezone=auto`;
+  
+  const resp=await fetch(url);
+  if(!resp.ok)throw new Error(`Weather API error (${resp.status})`);
+  
+  const data=await resp.json();
+  const times=data?.hourly?.time||[];
+  const temps=data?.hourly?.temperature_2m||[];
+  const vals=[];
+  
+  for(let i=0;i<times.length;i++){
+   if(times[i].slice(0,10)>=start&&times[i].slice(0,10)<=end&&Number.isFinite(temps[i])){
+    vals.push(temps[i]);
+   }
+  }
+  
+  if(!vals.length)throw new Error('या कालावधीसाठी तापमान डेटा उपलब्ध नाही.');
+  
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  f.avgTempSinceIrrigation=avg;
+  f.avgTempStart=start;
+  f.avgTempEnd=end;
+  f.avgTempHours=vals.length;
+  f.avgTempUpdatedAt=new Date().toISOString();
+  save();
+
+  value.textContent=avg.toFixed(1)+' °C';
+  meta.textContent=`${start} ते ${end} · ${vals.length} hourly readings · मॉडेलवर आधारित सरासरी`;
+  status.textContent=`✓ लोकेशन व तापमान यशस्वीरित्या मिळाले!`;
+
+ } catch(e){
+  console.error(e);
+  status.textContent=`त्रुटी: ${e.message||'Location किंवा temperature डेटा मिळाला नाही.'}`;
+ } finally {
+  btn.disabled=false;
+  btn.textContent='📍 Detect Location';
+ }
+}
+
+$('detectLocationBtn').addEventListener('click',detectFarmLocationAndAverageTemp);
+$('nextMoistureTarget').addEventListener('change',()=>{renderWater();renderIrrigationEstimate();});
+function openSoilPage(){const f=currentFarm();if(!f)return;$('soilFarmName').textContent=f.name;showPage('soil');renderSoilPage();}
+function renderSoilPage(){const f=currentFarm();if(!f)return;f.soilHistory=f.soilHistory||[];$('soilCurrent').innerHTML=reportRows(f.soilReport,SOIL_FIELDS);$('soilHistory').innerHTML=f.soilHistory.length?f.soilHistory.slice().reverse().map((r,i)=>`<div class="irrigation-entry"><strong>${esc(new Date(r.savedAt).toLocaleString())}</strong><div class="row-meta">${SOIL_FIELDS.map(([k,l])=>`${l}: ${r.values[k]??'—'}`).join(' · ')}</div><button class="secondary-small" data-view-soil="${f.soilHistory.length-1-i}" style="margin-top:8px">View</button></div>`).join(''):'<p class="row-meta">Previous report history will appear here after an update.</p>'; $('soilHistory').querySelectorAll('[data-view-soil]').forEach(b=>b.onclick=()=>{$('soilCurrent').innerHTML=reportRows(f.soilHistory[+b.dataset.viewSoil],SOIL_FIELDS);});const has=!!f.soilReport;$('soilFormCard').style.display=has?'none':'block';$('updateSoilBtn').style.display=has?'inline-block':'none';}
+function fillReportForm(prefix,report,fields,unitId){fields.forEach(([k])=>{const el=$(prefix+k);if(el)el.value=report?.values?.[k]??'';});$(unitId).value=report?.unit||'';}
+function openPetiolePage(){const f=currentFarm();if(!f)return;$('petioleFarmName').textContent=f.name;showPage('petiole');renderPetiolePage();}
+function renderPetiolePage(){const f=currentFarm();if(!f)return;f.petioleHistory=f.petioleHistory||[];$('petioleCurrent').innerHTML=reportRows(f.petioleReport,PET_FIELDS);$('petioleHistory').innerHTML=f.petioleHistory.length?f.petioleHistory.slice().reverse().map((r,i)=>`<div class="irrigation-entry"><strong>${esc(new Date(r.savedAt).toLocaleString())}</strong><div class="row-meta">${PET_FIELDS.map(([k,l])=>`${l}: ${r.values[k]??'—'}`).join(' · ')}</div><button class="secondary-small" data-view-petiole="${f.petioleHistory.length-1-i}" style="margin-top:8px">View</button></div>`).join(''):'<p class="row-meta">Previous report history will appear here after an update.</p>'; $('petioleHistory').querySelectorAll('[data-view-petiole]').forEach(b=>b.onclick=()=>{$('petioleCurrent').innerHTML=reportRows(f.petioleHistory[+b.dataset.viewPetiole],PET_FIELDS);});const has=!!f.petioleReport;$('petioleFormCard').style.display=has?'none':'block';$('updatePetioleBtn').style.display=has?'inline-block':'none';}
+function collectReport(prefix,fields,unitId){const values={};fields.forEach(([k])=>{if((prefix==='soil'&&['BulkDensity','CEC'].includes(k))||(prefix==='pet'&&k==='Slab'))return;const raw=$(prefix+k).value.trim();values[k]=raw===''?null:Number(raw);if(raw!==''&&!Number.isFinite(values[k]))throw new Error('कृपया सर्व मूल्ये योग्य प्रकारे भरा.');});if(prefix==='soil'){values.BulkDensity=$('soilBulkDensity').value===''?null:Number($('soilBulkDensity').value);values.CEC=$('soilCEC').value===''?null:Number($('soilCEC').value);}if(prefix==='pet'){values.Slab=$('petSlab').value;}return {values,unit:$(unitId).value.trim(),savedAt:new Date().toISOString()};}
+function tankCalculation(v){const E4=+v.depth,E5=+v.width,E6=+v.retention,E7=+v.drip,E8=+v.dripDist,E10=+v.lineDist;if([E4,E5,E6,E7,E8,E10].some(x=>!Number.isFinite(x)||x<=0))throw new Error('सर्व Tank inputs मध्ये शून्यापेक्षा मोठी value भरा.');const E12=((E4*E5*E6)/(E10/3.281))*(v.wash==='Yes'?1.2:1);const E13=E7/(E8*0.302)/(E10*0.302);const slabs=[{label:'Root Zone at 30%',val:E12*.4,water:((E12*.4)/E13)*E7},{label:'Root Zone at 40%',val:E12*.3,water:((E12*.3)/E13)*E7},{label:'Root Zone at 50%',val:E12*.2,water:((E12*.2)/E13)*E7}];return {depth:E4,width:E5,retention:E6,drip:E7,dripDist:E8,lineDist:E10,wash:v.wash,totalTank:E12,systemDischarge:E13,slabs,levelPercent:100,savedAt:new Date().toISOString()};}
+function showTankResults(t){$('tankResults').innerHTML=`<div class="section-card"><h3>Tank Calculation Result</h3><div class="list-row"><span>Total Tank</span><strong>${Number(t.totalTank).toFixed(2)} LTR</strong></div><div class="list-row"><span>System Discharge</span><strong>${Number(t.systemDischarge).toFixed(2)}</strong></div>${t.slabs.map(s=>`<div class="list-row"><div><strong>${esc(s.label)}</strong></div><strong>${Number(s.val).toFixed(3)}</strong></div><div class="list-row" style="background:#e5f7e9;padding:13px;border-radius:8px"><strong>Water Required</strong><strong>${Number(s.water).toFixed(2)} LTR</strong></div>`).join('')}</div>`;}
+function renderTankPage(){const f=currentFarm();if(!f)return;const has=!!f.tank;$('tankFormCard').style.display=has?'none':'block';$('updateTankBtn').style.display=has?'inline-block':'none';if(has)showTankResults(f.tank);else $('tankResults').innerHTML='<p class="row-meta">अजून टॅंक सेव्ह केलेला नाही. खाली माहिती भरा.</p>';renderTankHistory();}
+function renderTankHistory(){const f=currentFarm();const hist=f?.tankHistory||[];$('tankHistory').innerHTML=hist.length?'<div class="section-card"><h3>Previous Tank Records</h3>'+hist.slice().reverse().map((t,i)=>`<div class="list-row"><div><strong>${new Date(t.savedAt).toLocaleString()}</strong><div class="row-meta">Capacity: ${Number(t.totalTank).toFixed(2)} L · Previous calculation</div></div><button class="secondary-small" data-view-history="${hist.length-1-i}">View</button></div>`).join('')+'</div>':'<p class="row-meta">No previous tank record yet. When you update the tank, the old calculation will stay here.</p>';$('tankHistory').querySelectorAll('[data-view-history]').forEach(b=>b.onclick=()=>showTankResults(hist[+b.dataset.viewHistory]));}
+$('enterBtn').onclick=()=>{showPage('farms');render();};$('backBtn').onclick=()=>showPage('welcome');$('detailBackBtn').onclick=()=>{showPage('farms');render();};
+$('sprayPageBack').onclick=()=>showPage('detail');
+$('tankPageBack').onclick=()=>{showPage('detail');renderWater();};
+$('irrigationOpen').onclick=openIrrigationPage;$('irrigationPageBack').onclick=()=>{showPage('detail');renderWater();};$('cancelIrrigationBtn').onclick=()=>{showPage('detail');renderWater();};
+$('closeBtn').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('backdrop').onclick=e=>{if(e.target===$('backdrop'))closeModal();};
+$('farmForm').onsubmit=e=>{e.preventDefault();const name=$('farmName').value.trim(),acres=$('farmAcres').value,variety=$('variety').value,pruningDate=$('pruningDate').value;if(!name||!acres||!variety||!pruningDate)return;if(farms.some(x=>x.id!==editingFarmId&&x.name.toLowerCase()===name.toLowerCase())){alert('A farm with this name already exists.');return;}if(editingFarmId){const f=farms.find(x=>x.id===editingFarmId);if(!f)return;f.name=name;f.acres=acres;f.variety=variety;f.pruningDate=pruningDate;if(activeFarmId===f.id)$('detailFarmName').textContent=f.name;}else{farms.push({id:'farm_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,acres,variety,pruningDate,tank:null,tankHistory:[],sprays:[],irrigationLogs:[]});}save();render();closeModal();};
+$('sprayOpen').onclick=openSprayPage;
+$('addSprayBtn').onclick=()=>openSpray();$('sprayCloseBtn').onclick=$('sprayCancelBtn').onclick=()=>$('sprayBackdrop').classList.remove('show');$('sprayBackdrop').onclick=e=>{if(e.target===$('sprayBackdrop'))$('sprayBackdrop').classList.remove('show');};
+$('sprayForm').onsubmit=e=>{e.preventDefault();const f=currentFarm();if(!f)return;const s={id:editingSprayId||('spray_'+Date.now()),date:$('sprayDate').value,name:$('sprayName').value.trim(),dose:$('sprayDose').value.trim()};if(editingSprayId)f.sprays=f.sprays.map(x=>x.id===editingSprayId?s:x);else f.sprays.push(s);save();$('sprayBackdrop').classList.remove('show');renderSprays();};
+$('tankOpen').onclick=openTankPage;
+$('irrigationForm').onsubmit=e=>{e.preventDefault();const f=currentFarm();if(!f)return;f.irrigationLogs=f.irrigationLogs||[];const editId=$('irrigationForm').dataset.editId;const item={id:editId||('irr_'+Date.now()),date:$('irrigationDate').value,stage:Number($('irrigationStage').value),note:$('irrigationNote').value.trim()};if(editId)f.irrigationLogs=f.irrigationLogs.map(x=>x.id===editId?item:x);else f.irrigationLogs.push(item);delete $('irrigationForm').dataset.editId;save();$('irrigationForm').reset();$('irrigationDate').value=localDate();renderIrrigationHistory();renderIrrigationEstimate();renderWater();alert('Irrigation नोंद सेव्ह झाली.');};
+$('cancelTankBtn').onclick=()=>{const f=currentFarm();if(f?.tank){$('tankFormCard').style.display='none';}else{$('tankFormCard').style.display='block';} };
+$('updateTankBtn').onclick=()=>{const f=currentFarm();if(!f)return;const t=f.tank||{};[['tDepth',t.depth],['tWidth',t.width],['tRetention',t.retention],['tDrip',t.drip],['tDripDist',t.dripDist],['tLineDist',t.lineDist]].forEach(([id,v])=>$(id).value=v??'');$('tWash').value=t.wash||'Yes';$('tankFormHeading').textContent='Update Water Tank';$('tankFormCard').style.display='block';$('tankFormCard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('tankForm').onsubmit=e=>{e.preventDefault();const f=currentFarm();if(!f)return;const v={depth:+$('tDepth').value,width:+$('tWidth').value,retention:+$('tRetention').value,drip:+$('tDrip').value,dripDist:+$('tDripDist').value,lineDist:+$('tLineDist').value,wash:$('tWash').value};try{const t=tankCalculation(v);if(f.tank){f.tankHistory=f.tankHistory||[];f.tankHistory.push({...f.tank});}f.tank=t;save();$('tankFormCard').style.display='none';$('tankFormHeading').textContent='Update Water Tank';showTankResults(t);renderTankHistory();renderWater();alert('Tank calculation saved for this farm.');}catch(err){alert(err.message);}};
+$('soilOpen').onclick=openSoilPage;$('petioleOpen').onclick=openPetiolePage;
+$('soilPageBack').onclick=$('cancelSoilBtn').onclick=()=>showPage('detail');$('petiolePageBack').onclick=$('cancelPetioleBtn').onclick=()=>showPage('detail');
+$('updateSoilBtn').onclick=()=>{const f=currentFarm();if(!f)return;fillReportForm('soil',f.soilReport,SOIL_FIELDS,'soilUnit');$('soilFormHeading').textContent='Update Soil Report';$('soilFormCard').style.display='block';$('soilFormCard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('updatePetioleBtn').onclick=()=>{const f=currentFarm();if(!f)return;fillReportForm('pet',f.petioleReport,PET_FIELDS,'petioleUnit');$('petioleFormHeading').textContent='Update Petiole Report';$('petioleFormCard').style.display='block';$('petioleFormCard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('soilForm').onsubmit=e=>{e.preventDefault();const f=currentFarm();if(!f)return;try{const report=collectReport('soil',SOIL_FIELDS,'soilUnit');if(f.soilReport){f.soilHistory=f.soilHistory||[];f.soilHistory.push({...f.soilReport,values:{...f.soilReport.values}});}f.soilReport=report;delete f.lastRec;f.fertilizerDraft=[];save();renderSoilPage();alert('Soil Report सेव्ह झाला. Recommendation पुन्हा उघडल्यावर नव्याने calculate होईल.');}catch(err){alert(err.message);}};
+
+function openFertigationPage(){const f=currentFarm();if(!f)return;$('fertigationFarmName').textContent=f.name;showPage('fertigation');$('recPrereq').innerHTML=(!f.soilReport||!f.petioleReport)?`<div class="rec-warning">आधी ${!f.soilReport?'Soil Report':''}${(!f.soilReport&&!f.petioleReport)?' आणि ':''}${!f.petioleReport?'Petiole Report':''} सेव्ह करा.</div>`:'<div class="rec-positive">Soil Report आणि Petiole Report उपलब्ध आहेत.</div>';if(f.soilReport&&f.petioleReport){try{const previousSlab=f.lastRec?.slab;const newSlab=f.petioleReport.values?.Slab||'20-50';if(!f.lastRec||previousSlab!==newSlab||f.lastRec.soilSavedAt!==f.soilReport.savedAt||f.lastRec.petioleSavedAt!==f.petioleReport.savedAt){f.lastRec=calculateFertigation();f.lastRec.soilSavedAt=f.soilReport.savedAt;f.lastRec.petioleSavedAt=f.petioleReport.savedAt;save();}showRecResult(f.lastRec);}catch(e){$('recOutput').innerHTML='<p class="row-meta">'+esc(e.message)+'</p>';}}else{$('recOutput').innerHTML='<p class="row-meta">आधी Soil Report आणि Petiole Report सेव्ह करा.</p>';}
+ const slab=f.viewingFertilizerSlab||f.lastRec?.slab||f.petioleReport?.values?.Slab||'20-50';f.fertilizerSetsBySlab=f.fertilizerSetsBySlab||{};f.viewingFertilizerSlab=slab;const rec=(f.recommendationHistory||[]).find(r=>r.slab===slab);if(rec)f.lastRec=rec;f.fertilizerDraft=(f.fertilizerSetsBySlab[slab]||[]).map(x=>({...x,supplied:{...(x.supplied||{})}}));f.isEditingFertilizers=false;$('fertilizerPickerCard').style.display='none';$('workingFertilizers').innerHTML='';renderFertilizerChoices();renderWorkingFertilizers();renderSavedFertilizers();save();}
+const REC_SLABS={'20-50':{biomass:800,actual:150,waterMM:90,req:{N:25.85,P:6.37,K:21.44,Mg:5.11,Ca:18.49}},'50-90':{biomass:1000,actual:800,waterMM:110,req:{N:35.69,P:8.07,K:29.24,Mg:6.97,Ca:25.21}},'90-120':{biomass:1200,actual:1000,waterMM:100,req:{N:42.83,P:8.92,K:35.09,Mg:8.37,Ca:30.25}}};
+function calculateFertigation(){
+ const f=currentFarm();if(!f)throw new Error('Farm निवडलेला नाही.');
+ if(!f.soilReport||!f.petioleReport)throw new Error('आधी Soil Report आणि Petiole Report सेव्ह करा.');
+ const soil=f.soilReport.values||{},pet=f.petioleReport.values||{},slab=pet.Slab||'20-50',st=REC_SLABS[slab];
+ const input={rootDepth:0.8,rootWidth:3,rowDistance:3,bulkDensity:Number(soil.BulkDensity)||1.4,cec:Number(soil.CEC)||37};
+ if(Object.values(input).some(v=>!Number.isFinite(v)||v<=0))throw new Error('सर्व soil-volume inputs शून्यापेक्षा मोठे असावेत.');
+ const num=(obj,k)=>obj[k]===null||obj[k]===undefined||obj[k]===''?null:Number(obj[k]);
+ const required={...st.req};
+ // Replicate the spreadsheet's current soil-availability calculation where inputs exist.
+ const soilAvailable={N:0,P:0,K:0,Ca:0,Mg:0};
+ const soilN=num(soil,'N');
+ if(soilN!==null){
+   const soilVolume=((input.rootDepth*input.rootWidth/input.rowDistance)*4000)*input.bulkDensity;
+   const nAvailableKg=((((soilVolume*soilN/1000)*0.05)*0.70)*0.70)*0.90;
+   const liters=st.waterMM*40;
+   const nPer100L=((nAvailableKg*1000/12000)*1000);
+   soilAvailable.N=(liters*nPer100L)/1000000;
+ }
+ // Cation availability follows workbook's CEC-based percent formulas; report values are ppm/mg/kg.
+ const sumCations=['K','Ca','Mg','Na'].reduce((a,k)=>a+(num(soil,k)||0),0);
+ const cationPct={};
+ ['K','Ca','Mg','Na'].forEach(k=>cationPct[k]=sumCations>0?((num(soil,k)||0)/sumCations)*100:0);
+ const waterLitres=st.waterMM*40;
+ soilAvailable.K=(waterLitres*((cationPct.K*input.cec*39.1)/100))/1000000;
+ soilAvailable.Ca=(waterLitres*((cationPct.Ca*input.cec*20.04)/100))/1000000;
+ soilAvailable.Mg=(waterLitres*((cationPct.Mg*input.cec*12.155)/100))/1000000;
+ // Spreadsheet currently does not subtract soil P; keep its formula behaviour.
+ const actual=st.actual;
+ const petAvail={N:num(pet,'N')===null?null:(num(pet,'N')*actual/100)*2.7,
+ P:num(pet,'P')===null?null:(num(pet,'P')*actual/100)*2.72,
+ K:num(pet,'K')===null?null:(num(pet,'K')*st.waterMM/100)*1.5,
+ Ca:num(pet,'Ca')===null?null:(num(pet,'Ca')*st.waterMM/100)*1.6,
+ Mg:num(pet,'Mg')===null?null:(num(pet,'Mg')*st.waterMM/100)*1.6};
+ const need={N:required.N-(petAvail.N||0)-soilAvailable.N,P:(required.P-(petAvail.P||0))*0.8,K:required.K-(petAvail.K||0)-soilAvailable.K,Ca:required.Ca-(petAvail.Ca||0)-soilAvailable.Ca,Mg:required.Mg-(petAvail.Mg||0)-soilAvailable.Mg};
+ const output={id:'rec_'+Date.now(),slab,inputs:input,required,soilAvailable,petAvail,need,createdAt:new Date().toISOString(),farmName:f.name,area:Number(f.acres)||1};
+ f.lastRecSlab=slab;return output;
+}
+function showRecResult(r){const labels={N:'Nitrogen (N)',P:'Phosphorus (P)',K:'Potassium (K)',Ca:'Calcium (Ca)',Mg:'Magnesium (Mg)'};$('recOutput').innerHTML=`<div class="row-meta">Farm: ${esc(r.farmName)} · Slab: ${esc(r.slab)}</div><div class="water-stats">${Object.keys(labels).map(k=>`<div class="water-stat"><span>${labels[k]}</span><strong>${Math.max(0,Number(r.need[k])||0).toFixed(3)} kg</strong></div>`).join('')}</div><p class="row-meta">Required nutrient हे elemental form मधील प्राथमिक गणिती output आहे; final agronomy validation आवश्यक आहे.</p>`;renderFertilizerChoices();renderSavedFertilizers();}
+function renderRecHistory(){const f=currentFarm();if(!f)return;const h=f.recommendationHistory||[];$('recHistory').innerHTML=h.length?h.slice().reverse().map((r,i)=>`<div class="list-row"><div><strong>${esc(r.slab)} slab · ${esc(new Date(r.createdAt).toLocaleString())}</strong><div class="row-meta">N ${Number(r.need.N).toFixed(2)} · P ${Number(r.need.P).toFixed(2)} · K ${Number(r.need.K).toFixed(2)}</div></div><button class="secondary-small" data-rec-view="${h.length-1-i}">View</button></div>`).join(''):'<p class="row-meta">No saved recommendations yet.</p>';$('recHistory').querySelectorAll('[data-rec-view]').forEach(b=>b.onclick=()=>{const f=currentFarm();showRecResult(f.recommendationHistory[+b.dataset.recView]);});}
+const FERTILIZERS={
+ // Water-soluble straight fertilizers commonly used for fertigation
+ UREA:{name:'Urea (46% N)',type:'Water Soluble • Nitrogen',N:.46,P2O5:0,K2O:0,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ CaNO3:{name:'Calcium Nitrate (15.5% N + 18.5% Ca)',type:'Water Soluble • Calcium/Nitrogen',N:.155,P2O5:0,K2O:0,Ca:.185,CaO:0,Mg:0,MgO:0,S:0},
+ KNO3:{name:'Potassium Nitrate (13:00:45)',type:'Water Soluble • Nitrogen/Potassium',N:.13,P2O5:0,K2O:.45,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ MgNO3:{name:'Magnesium Nitrate (≈11% N + ≈16% MgO)',type:'Water Soluble • Magnesium/Nitrogen',N:.11,P2O5:0,K2O:0,Ca:0,CaO:0,Mg:0,MgO:.16,S:0},
+ MgSO4:{name:'Magnesium Sulphate (≈9.8% Mg + S)',type:'Water Soluble • Magnesium/Sulphur',N:0,P2O5:0,K2O:0,Ca:0,CaO:0,Mg:.098,MgO:0,S:.13},
+
+ // Phosphorus-only liquid source for cases where elemental P remains
+ // 85% phosphoric acid: approximately 26.9% elemental P by product mass.
+ // Quantity is displayed in kg of product; density/L conversion is not assumed.
+ PHOSACID85:{name:'Phosphoric Acid 85% (≈26.9% elemental P)',type:'Liquid Fertilizer • Phosphorus only • kg product',N:0,P2O5:0,K2O:0,Ca:0,CaO:0,Mg:0,MgO:0,S:0,P_ELEMENTAL:.269},
+
+ // Calcium thiosulfate liquid fertilizer; typical label 6% elemental Ca + 10% elemental S.
+ // Elemental Ca is used by this engine; sulfur is shown in the product name/details but is not part of N/P/K/Ca/Mg balancing.
+ CATHIO:{name:'Calcium Thiosulfate (Ca 6% + S 10% liquid)',type:'Liquid Fertilizer • Calcium/Sulphur',N:0,P2O5:0,K2O:0,Ca:0.06,CaO:0,Mg:0,MgO:0,S:0.10},
+
+ // Water-soluble phosphate grades
+ MAP:{name:'MAP (12:61:00)',type:'Water Soluble • Phosphorus/Nitrogen',N:.12,P2O5:.61,K2O:0,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ MKP:{name:'MKP (00:52:34)',type:'Water Soluble • Phosphorus/Potassium',N:0,P2O5:.52,K2O:.34,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ UREAPHOS:{name:'Urea Phosphate (17:44:00)',type:'Water Soluble • Nitrogen/Phosphorus',N:.17,P2O5:.44,K2O:0,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+
+ // Water-soluble potassium grades
+ SOP:{name:'SOP (00:00:50 + ~17.5% S)',type:'Water Soluble • Potassium/Sulphur',N:0,P2O5:0,K2O:.50,Ca:0,CaO:0,Mg:0,MgO:0,S:.175},
+ MOPWS:{name:'MOP (00:00:60) — Water-Soluble Grade',type:'Water Soluble • Potassium',N:0,P2O5:0,K2O:.60,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+
+ // Other water-soluble grades used in horticulture/grape fertigation
+ NP130526:{name:'NPK 13:05:26',type:'Water Soluble • NPK',N:.13,P2O5:.05,K2O:.26,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP006020:{name:'NPK 00:60:20',type:'Water Soluble • Phosphorus/Potassium',N:0,P2O5:.60,K2O:.20,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ CALPHOS:{name:'CalPhos 00:57:17 + 7% CaO (check label)',type:'Water Soluble • Phosphorus/Potassium/Calcium',N:0,P2O5:.57,K2O:.17,Ca:0,CaO:.07,Mg:0,MgO:0,S:0},
+ PMS:{name:'PMS (23% K2O + 18% MgO + 20% S)',type:'Water Soluble • Potassium/Magnesium/Sulphur',N:0,P2O5:0,K2O:.23,Ca:0,CaO:0,Mg:0,MgO:.18,S:.20},
+
+ // Water-soluble NPK grades
+ NP134013:{name:'NPK 13:40:13',type:'Water Soluble • NPK',N:.13,P2O5:.40,K2O:.13,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP101010:{name:'NPK 10:55:10',type:'Water Soluble • NPK',N:.10,P2O5:.55,K2O:.10,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP191919:{name:'NPK 19:19:19',type:'Water Soluble • NPK',N:.19,P2O5:.19,K2O:.19,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP202020:{name:'NPK 20:20:20',type:'Water Soluble • NPK',N:.20,P2O5:.20,K2O:.20,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP181818:{name:'NPK 18:18:18 + ~6.1% S',type:'Water Soluble • NPK/Sulphur',N:.18,P2O5:.18,K2O:.18,Ca:0,CaO:0,Mg:0,MgO:0,S:.061},
+ NP151515:{name:'NPK 15:15:15',type:'Water Soluble • NPK',N:.15,P2O5:.15,K2O:.15,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP161616:{name:'NPK 16:16:16',type:'Water Soluble • NPK',N:.16,P2O5:.16,K2O:.16,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP171717:{name:'NPK 17:17:17',type:'Water Soluble • NPK',N:.17,P2O5:.17,K2O:.17,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP123216:{name:'NPK 12:32:16',type:'Water Soluble • NPK',N:.12,P2O5:.32,K2O:.16,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP061236:{name:'NPK 06:12:36',type:'Water Soluble • NPK',N:.06,P2O5:.12,K2O:.36,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP160824:{name:'NPK 16:08:24',type:'Water Soluble • NPK',N:.16,P2O5:.08,K2O:.24,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP151530:{name:'NPK 15:15:30',type:'Water Soluble • NPK',N:.15,P2O5:.15,K2O:.30,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP051045:{name:'NPK 05:10:45',type:'Water Soluble • NPK',N:.05,P2O5:.10,K2O:.45,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+ NP004430:{name:'NPK 00:44:30',type:'Water Soluble • Phosphorus/Potassium',N:0,P2O5:.44,K2O:.30,Ca:0,CaO:0,Mg:0,MgO:0,S:0},
+
+ // User-specified water-soluble magnesium/potassium source
+ PMS:{name:'PMS (23% K₂O + 18% MgO + 20% S)',type:'Water Soluble • Potassium/Magnesium/Sulphur',N:0,P2O5:0,K2O:.23,Ca:0,CaO:0,Mg:0,MgO:.18,S:.20}
+};
+function restoreCustomGrades(){try{const all=JSON.parse(localStorage.getItem('fertileFieldsCustomGradesV1')||'{}');Object.values(all).flat().forEach(g=>{if(g&&g.key&&g.name)FERTILIZERS[g.key]={name:g.name,type:'Custom Grade • User Added',N:(Number(g.N)||0)/100,P2O5:(Number(g.P2O5)||0)/100,K2O:(Number(g.K2O)||0)/100,Ca:(Number(g.Ca)||0)/100,CaO:0,Mg:(Number(g.Mg)||0)/100,MgO:0,S:0,custom:true};});}catch(e){}}
+restoreCustomGrades();
+function fertProfile(f){return {N:f.N||0,P:(f.P_ELEMENTAL||0)+(f.P2O5||0)*.4364,K:(f.K2O||0)*.8301,Ca:(f.Ca||0)+(f.CaO||0)*.7147,Mg:(f.Mg||0)+(f.MgO||0)*.6031};}
+function currentNeedBalance(){const f=currentFarm();const req=f?.lastRec?.need||{};const draft=f?.fertilizerDraft||[];const bal=Object.fromEntries(['N','P','K','Ca','Mg'].map(k=>[k,Math.max(0,Number(req[k])||0)]));draft.forEach(item=>{const prod=FERTILIZERS[item.key];if(!prod)return;const prof=fertProfile(prod);Object.keys(bal).forEach(k=>bal[k]=Math.max(0,bal[k]-prof[k]*item.quantity));});return bal;}
+function maxQuantityFor(prod,bal){let qty=Infinity;for(const k of ['N','P','K','Ca','Mg']){const rate=fertProfile(prod)[k];if(rate>0)qty=Math.min(qty,(bal[k]||0)/rate);}return Number.isFinite(qty)?Math.max(0,qty):0;}
+function fertilizerIsCompatibleWithBalance(prod,bal){const p=fertProfile(prod);let contributes=false;for(const k of ['N','P','K','Ca','Mg']){if(p[k]>0){if((Number(bal[k])||0)<=1e-9)return false;contributes=true;}}return contributes;}
+function renderFertilizerChoices(){const f=currentFarm();if(!f||!f.isEditingFertilizers)return;const search=($('fertilizerSearch').value||'').trim().toLowerCase();const bal=currentNeedBalance();const compatible=Object.entries(FERTILIZERS).filter(([key,x])=>{if(!fertilizerIsCompatibleWithBalance(x,bal))return false;if(!search)return true;return [x.name,x.type||'',key].join(' ').toLowerCase().includes(search);});$('fertilizerChoices').innerHTML=compatible.map(([key,x])=>{const p=fertProfile(x);const qty=maxQuantityFor(x,bal);const targets=['N','P','K','Ca','Mg'].filter(k=>p[k]>0&&bal[k]>0).map(k=>k+': '+bal[k].toFixed(3)+' kg').join(' · ');return `<div class="fert-choice"><div class="fert-choice-info"><strong>${esc(x.name)}</strong><small>${esc(x.type||'Fertilizer Grade')}<br>Remaining elements: ${targets||'—'}<br>Maximum quantity for remaining need</small><span class="fert-qty">${qty.toFixed(3)} <small>kg/acre</small></span></div><button type="button" class="primary-small" data-add-fert="${key}" ${qty<=1e-9?'disabled':''}>+ Add</button></div>`;}).join('')||'<p class="row-meta">या उरलेल्या पोषणमूल्यांसाठी जुळणारे खत सापडले नाही. दुसरा शोध वापरा.</p>';$('fertilizerChoices').querySelectorAll('[data-add-fert]').forEach(b=>b.onclick=()=>addFertilizerToDraft(b.dataset.addFert));}
+function addFertilizerToDraft(key){const f=currentFarm();if(!f?.lastRec)return;const prod=FERTILIZERS[key];if(!prod)return;f.fertilizerDraft=f.fertilizerDraft||[];const bal=currentNeedBalance();if(!fertilizerIsCompatibleWithBalance(prod,bal)){alert('या खतामध्ये असलेल्या एखाद्या element ची requirement आधीच पूर्ण झाली आहे. इंडेक्स फाइलप्रमाणे हे खत आता निवडता येणार नाही.');renderFertilizerChoices();return;}const qty=maxQuantityFor(prod,bal);if(qty<=1e-9){alert('उरलेल्या पोषणमूल्यांच्या गरजेसाठी हे खत आता योग्य नाही.');return;}const prof=fertProfile(prod);const supplied={};['N','P','K','Ca','Mg'].forEach(k=>supplied[k]=qty*prof[k]);f.fertilizerDraft.push({key,name:prod.name,quantity:qty,supplied});renderFertilizerChoices();renderWorkingFertilizers();}
+function renderWorkingFertilizers(){const f=currentFarm();if(!f||!f.isEditingFertilizers){$('workingFertilizers').innerHTML='';return;}const draft=f.fertilizerDraft||[];const bal=currentNeedBalance();const fmt=n=>Number(n||0).toFixed(3);$('workingFertilizers').innerHTML=`<div class="section-card" style="margin-top:12px"><h3>Selected Fertilizers</h3>${draft.length?draft.map((x,i)=>`<div class="list-row"><div><strong>${esc(x.name)}</strong><div class="row-meta">${fmt(x.quantity)} kg/acre</div><div class="row-meta">N ${fmt(x.supplied?.N)} · P ${fmt(x.supplied?.P)} · K ${fmt(x.supplied?.K)} · Ca ${fmt(x.supplied?.Ca)} · Mg ${fmt(x.supplied?.Mg)}</div></div><button type="button" class="secondary-small" data-remove-draft="${i}">Remove</button></div>`).join(''):'<p class="row-meta">अजून खत निवडलेले नाही.</p>'}<h3 style="margin-top:12px">Remaining Elemental Requirement</h3><div class="row-meta">Element · Required · Supplied · Remaining</div>${['N','P','K','Ca','Mg'].map(k=>{const req=Math.max(0,Number(f.lastRec?.need?.[k])||0),remaining=bal[k],supplied=Math.max(0,req-remaining);return `<div class="list-row"><span>${k} · ${fmt(req)} · ${fmt(supplied)}</span><strong>${fmt(remaining)} kg</strong></div>`;}).join('')}</div>`;$('workingFertilizers').querySelectorAll('[data-remove-draft]').forEach(b=>b.onclick=()=>{f.fertilizerDraft.splice(+b.dataset.removeDraft,1);renderWorkingFertilizers();renderFertilizerChoices();});}
+function daysAfterPruning(f){if(!f?.pruningDate)return null;const d=Math.floor((new Date(localDate()+'T12:00:00')-new Date(f.pruningDate+'T12:00:00'))/86400000);return Number.isFinite(d)?d:null;}
+function slabExpired(f,slab){const d=daysAfterPruning(f);if(d===null)return false;const end=Number(slab.split('-')[1]);return d>end;}
+function renderSavedFertilizers(){const f=currentFarm();if(!f)return;f.fertilizerSetsBySlab=f.fertilizerSetsBySlab||{};f.fertilizerUseLogs=f.fertilizerUseLogs||{};const slabs=['20-50','50-90','90-120'];const history=f.recommendationHistory||[];const available=slabs.filter(s=>!slabExpired(f,s)&&((f.fertilizerSetsBySlab[s]||[]).length||history.some(r=>r.slab===s)));const active=f.viewingFertilizerSlab||f.lastRec?.slab||f.petioleReport?.values?.Slab||'20-50';if(!available.includes(active)&&available.length)f.viewingFertilizerSlab=available[0];const slab=f.viewingFertilizerSlab||available[0]||active;const list=f.fertilizerSetsBySlab[slab]||[];const rec=history.find(r=>r.slab===slab)||(f.lastRec?.slab===slab?f.lastRec:null);$('fertilizerSlabTabs').innerHTML=available.map(s=>`<button type="button" class="fert-slab-tab ${s===slab?'active':''}" data-slab="${s}">${s} Slab Fertilizers</button>`).join('');$('fertilizerSlabTabs').querySelectorAll('[data-slab]').forEach(b=>b.onclick=()=>{const f=currentFarm();if(!f)return;f.viewingFertilizerSlab=b.dataset.slab;const r=(f.recommendationHistory||[]).find(x=>x.slab===b.dataset.slab);if(r)f.lastRec=r;f.fertilizerDraft=(f.fertilizerSetsBySlab[b.dataset.slab]||[]).map(x=>({...x,supplied:{...(x.supplied||{})}}));f.isEditingFertilizers=false;$('fertilizerPickerCard').style.display='none';renderSavedFertilizers();});
+$('savedSlabLabel').textContent=slabExpired(f,slab)?'या स्लॅबचा कालावधी पूर्ण झाला आहे. नवीन स्लॅबसाठी नवीन रिपोर्ट/शिफारस सेव्ह करा.':slab+' days · '+(list.length?'Saved fertilizer set':'या slab साठी सेट अजून सेव्ह केलेला नाही');const req=rec?.need||{};$('savedRequiredElements').innerHTML=rec?'<div class="row-meta">त्या वेळी Required Elemental Nutrition (kg/acre)</div><div class="saved-req-grid">'+['N','P','K','Ca','Mg'].map(k=>`<div class="saved-req-cell">${k}<strong>${Number(req[k]||0).toFixed(2)}</strong></div>`).join('')+'</div>':'';
+const acres=Math.max(0,Number(f.acres)||1);const slabLogs=(f.fertigationEntries||[]).filter(l=>(l.slab||slab)===slab);const profiles=slabLogs.map(l=>({log:l,profile:fertProfile(FERTILIZERS[l.key]||{})}));const target={N:0,P:0,K:0,Ca:0,Mg:0};list.forEach(x=>{const prod=FERTILIZERS[x.key]||{};const prof=fertProfile(prod);['N','P','K','Ca','Mg'].forEach(k=>target[k]+=prof[k]*Number(x.quantity||0));});const delivered={N:0,P:0,K:0,Ca:0,Mg:0};profiles.forEach(({log,profile})=>['N','P','K','Ca','Mg'].forEach(k=>delivered[k]+=profile[k]*Number(log.quantity||0)/acres));const hasAlternativeGrade=slabLogs.some(l=>!list.some(x=>(x.key&&l.key===x.key)||(!x.key&&l.gradeName===x.name)));$('savedFertilizers').innerHTML=list.length?list.map((x,i)=>{const recommended=Number(x.quantity||0)*acres;const sameUsed=slabLogs.filter(l=>l.key===(x.key||'')||(!l.key&&l.gradeName===x.name)).reduce((a,l)=>a+Number(l.quantity||0),0);const recProfile=fertProfile(FERTILIZERS[x.key]||{});let altEquivalent=0;profiles.filter(({log})=>log.key!==(x.key||'')&&log.gradeName!==x.name).forEach(({log,profile})=>{const q=Number(log.quantity||0);['N','P','K','Ca','Mg'].forEach(k=>{if((recProfile[k]||0)>0)altEquivalent=Math.max(altEquivalent,(profile[k]||0)*q/(recProfile[k]*acres));});});const remaining=Math.max(0,recommended-sameUsed-altEquivalent*acres);return `<div class="fert-set-card"><div class="fert-set-top"><div class="fert-set-main"><span class="fert-set-name">${esc(x.name)}</span><span class="fert-set-grade">Elemental contribution · N ${Number(x.supplied?.N||0).toFixed(2)} · P ${Number(x.supplied?.P||0).toFixed(2)} · K ${Number(x.supplied?.K||0).toFixed(2)} · Ca ${Number(x.supplied?.Ca||0).toFixed(2)} · Mg ${Number(x.supplied?.Mg||0).toFixed(2)}</span></div><div class="fert-set-qty">${recommended.toFixed(2)}<small> kg total</small></div></div><div class="saved-req-grid" style="margin-top:8px"><div class="saved-req-cell">Recommended<strong>${recommended.toFixed(2)} kg</strong></div><div class="saved-req-cell">Given<strong>${sameUsed.toFixed(2)} kg</strong></div><div class="saved-req-cell">Remaining<strong>${remaining.toFixed(2)} kg</strong></div></div></div>`;}).join(''):'<p class="row-meta">या स्लॅबसाठी खतांचा सेट सेव्ह केलेला नाही किंवा स्लॅबचा कालावधी पूर्ण झाला आहे.</p>';
+
+const edit=$('editFertilizersBtn');edit.style.display=(f.soilReport&&f.petioleReport&&!slabExpired(f,slab))?'':'none';}
+function renderIrrigationFertigation(){const f=currentFarm();if(!f)return;const sel=$('irrigationFertGrade'),old=sel.value;sel.innerHTML='<option value="">खत निवडा</option>'+Object.entries(FERTILIZERS).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([k,g])=>`<option value="${esc(k)}">${esc(g.name)}</option>`).join('');if(Object.prototype.hasOwnProperty.call(FERTILIZERS,old))sel.value=old;const slab=f.viewingFertilizerSlab||f.lastRec?.slab||f.petioleReport?.values?.Slab||'20-50';const logs=f.fertigationEntries||[];$('irrigationFertHistory').innerHTML=logs.length?logs.slice().reverse().map(l=>`<div class="irrigation-entry"><div class="irrigation-entry-head"><strong>${esc(l.gradeName)}</strong><span class="stage-pill">${Number(l.quantity).toFixed(2)} kg</span></div><div class="row-meta">${esc(l.date)} · ${esc(l.slab||slab)} slab</div><div class="row-buttons" style="margin-top:9px"><button type="button" class="secondary-small" data-edit-fert-entry="${esc(l.id)}">Edit</button></div></div>`).join(''):'<p class="row-meta">अजून खत देण्याची नोंद नाही.</p>';$('irrigationFertHistory').querySelectorAll('[data-edit-fert-entry]').forEach(b=>b.onclick=()=>openFertigationEdit(b.dataset.editFertEntry));}
+function openFertigationEdit(id){const f=currentFarm();const l=f?.fertigationEntries?.find(x=>x.id===id);if(!l)return;$('fertigationEditBackdrop').dataset.entryId=id;$('editFertGrade').innerHTML=Object.entries(FERTILIZERS).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([k,g])=>`<option value="${esc(k)}">${esc(g.name)}</option>`).join('');$('editFertGrade').value=l.key||'';$('editFertDate').value=l.date||localDate();$('editFertQty').value=Number(l.quantity)||'';$('fertigationEditBackdrop').classList.add('show');}
+function closeFertigationEdit(){$('fertigationEditBackdrop').classList.remove('show');delete $('fertigationEditBackdrop').dataset.entryId;}
+$('closeFertigationEdit').onclick=closeFertigationEdit;$('fertigationEditBackdrop').addEventListener('click',e=>{if(e.target===$('fertigationEditBackdrop'))closeFertigationEdit();});
+$('saveFertEntryEdit').onclick=()=>{const f=currentFarm();const id=$('fertigationEditBackdrop').dataset.entryId;const l=f?.fertigationEntries?.find(x=>x.id===id);const key=$('editFertGrade').value,prod=FERTILIZERS[key],qty=Number($('editFertQty').value),date=$('editFertDate').value;if(!l||!prod||!date||!Number.isFinite(qty)||qty<=0){alert('खत, तारीख आणि योग्य मात्रा भरा.');return;}l.key=key;l.gradeName=prod.name;l.quantity=qty;l.date=date;save();closeFertigationEdit();renderIrrigationFertigation();renderSavedFertilizers();};
+$('removeFertEntry').onclick=()=>{const f=currentFarm();const id=$('fertigationEditBackdrop').dataset.entryId;if(!f||!id)return;if(!confirm('ही Fertigation नोंद कायमची काढायची?'))return;f.fertigationEntries=(f.fertigationEntries||[]).filter(x=>x.id!==id);save();closeFertigationEdit();renderIrrigationFertigation();renderSavedFertilizers();};
+function saveCustomGradeFrom(prefix){const f=currentFarm();if(!f)return;const ids=prefix==='irCustom'?{Name:'irCustomName',N:'irCustomN',P:'irCustomP',K:'irCustomK',Ca:'irCustomCa',Mg:'irCustomMg'}:{Name:'customGradeName',N:'customN',P:'customP',K:'customK',Ca:'customCa',Mg:'customMg'};const name=$(ids.Name).value.trim();if(!name){alert('Grade name भरा.');return;}const vals={N:Number($(ids.N).value)||0,P2O5:Number($(ids.P).value)||0,K2O:Number($(ids.K).value)||0,Ca:Number($(ids.Ca).value)||0,Mg:Number($(ids.Mg).value)||0};if(!Object.values(vals).some(v=>v>0)){alert('N, P₂O₅, K₂O, Ca किंवा Mg पैकी किमान एक value भरा.');return;}if(Object.values(vals).some(v=>v<0||v>100)){alert('प्रत्येक grade value 0 ते 100% मध्ये असावी.');return;}const key='CUSTOM_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);const g={key,name,...vals};FERTILIZERS[key]={name,type:'Custom Grade • User Added',N:vals.N/100,P2O5:vals.P2O5/100,K2O:vals.K2O/100,Ca:vals.Ca/100,CaO:0,Mg:vals.Mg/100,MgO:0,S:0,custom:true};const all=JSON.parse(localStorage.getItem('fertileFieldsCustomGradesV1')||'{}');all[f.id]=all[f.id]||[];all[f.id].push(g);localStorage.setItem('fertileFieldsCustomGradesV1',JSON.stringify(all));renderIrrigationFertigation();if(prefix==='irCustom'){$('irCustomGradeStatus').textContent='नवीन grade दोन्ही ठिकाणच्या लिस्टमध्ये जोडला आहे.';$('irrigationFertGrade').value=key;$('irrigationCustomGradePanel').style.display='none';}else{$('customGradeStatus').textContent='नवीन grade लिस्टमध्ये जोडला आहे. आता Search करून + Add करा.';$('fertilizerSearch').value=name;$('customGradePanel').style.display='none';renderFertilizerChoices();}}
+$('openIrrigationCustomGradeBtn').onclick=()=>{$('irrigationCustomGradePanel').style.display='block';$('irCustomName').focus();};$('cancelIrrigationCustomGradeBtn').onclick=()=>{$('irrigationCustomGradePanel').style.display='none';};$('saveIrrigationCustomGradeBtn').onclick=()=>saveCustomGradeFrom('irCustom');
+$('logIrrigationFertBtn').onclick=()=>{const f=currentFarm();if(!f)return;const key=$('irrigationFertGrade').value,qty=Number($('irrigationFertQty').value),prod=FERTILIZERS[key];if(!prod){alert('Fertilizer grade निवडा.');return;}if(!Number.isFinite(qty)||qty<=0){alert('दिलेली मात्रा kg मध्ये भरा.');return;}const slab=f.viewingFertilizerSlab||f.lastRec?.slab||f.petioleReport?.values?.Slab||'20-50';f.fertigationEntries=f.fertigationEntries||[];f.fertigationEntries.push({id:'fg_'+Date.now(),date:$('irrigationDate').value||localDate(),key,gradeName:prod.name,quantity:qty,slab});f.fertilizerUseLogs=f.fertilizerUseLogs||{};const logKey=slab+'|'+key;f.fertilizerUseLogs[logKey]=f.fertilizerUseLogs[logKey]||[];f.fertilizerUseLogs[logKey].push({date:$('irrigationDate').value||localDate(),quantity:qty});save();$('irrigationFertQty').value='';$('irrigationFertStatus').textContent='खत देण्याची नोंद सेव्ह झाली. Fertilizer Recommendations मध्ये शिल्लक मात्रा अपडेट झाली आहे.';renderIrrigationFertigation();renderSavedFertilizers();};
+$('openCustomGradeBtn').onclick=()=>{$('customGradePanel').style.display='block';$('customGradeName').focus();};
+$('cancelCustomGradeBtn').onclick=()=>{$('customGradePanel').style.display='none';};
+$('saveCustomGradeBtn').onclick=()=>saveCustomGradeFrom('customGrade');
+$('fertilizerSearch').addEventListener('input',renderFertilizerChoices);
+$('saveFertilizersBtn').onclick=()=>{const f=currentFarm();if(!f||!f.lastRec){alert('आधी Soil Report आणि Petiole Report सेव्ह करा.');return;}const chosen=(f.fertilizerDraft||[]).map(x=>({...x,supplied:{...x.supplied}}));if(!chosen.length){alert('किमान एक fertilizer grade + Add करून निवडा.');return;}const slab=f.viewingFertilizerSlab||f.lastRec.slab||'20-50';f.lastRec.slab=slab;f.fertilizerSetsBySlab=f.fertilizerSetsBySlab||{};f.fertilizerSetsBySlab[slab]=chosen;f.fertilizerSet=chosen;f.recommendationHistory=f.recommendationHistory||[];const existing=f.recommendationHistory.findIndex(r=>r.slab===slab);const rec={...f.lastRec,need:{...f.lastRec.need},soilAvailable:{...f.lastRec.soilAvailable},petAvail:{...f.lastRec.petAvail},fertilizerSet:chosen.map(x=>({...x,supplied:{...x.supplied}})),createdAt:new Date().toISOString()};if(existing>=0)f.recommendationHistory[existing]=rec;else f.recommendationHistory.push(rec);save();f.isEditingFertilizers=false;$('fertilizerPickerCard').style.display='none';renderSavedFertilizers();$('fertSetStatus').textContent='या slab साठी खतांचा सेट सेव्ह झाला. पुढच्या वेळी हाच सेट दिसेल.';alert('या day slab साठी fertilizer set सेव्ह झाला. या slab वर पुन्हा सेव्ह केल्यास जुना सेट अपडेट होईल; duplicate history तयार होणार नाही.');};
+$('editFertilizersBtn').onclick=()=>{const f=currentFarm();if(!f||!f.lastRec)return;const slab=f.viewingFertilizerSlab||f.lastRec.slab||'20-50';const savedRec=(f.recommendationHistory||[]).find(r=>r.slab===slab);if(savedRec)f.lastRec=savedRec;f.fertilizerSetsBySlab=f.fertilizerSetsBySlab||{};f.fertilizerDraft=(f.fertilizerSetsBySlab[slab]||[]).map(x=>({...x,supplied:{...(x.supplied||{})}}));f.isEditingFertilizers=true;$('fertilizerPickerCard').style.display='block';$('fertilizerSearch').value='';renderFertilizerChoices();renderWorkingFertilizers();$('fertilizerSearch').focus();$('fertSetStatus').textContent='खतांमध्ये बदल करा. Save केल्यावर याच slab चा सेट अपडेट होईल.';};
+$('cancelFertilizerEditBtn').onclick=()=>{const f=currentFarm();if(!f)return;f.isEditingFertilizers=false;const slab=f.lastRec?.slab||'20-50';f.fertilizerDraft=(f.fertilizerSetsBySlab?.[slab]||[]).map(x=>({...x,supplied:{...(x.supplied||{})}}));$('fertilizerPickerCard').style.display='none';renderSavedFertilizers();};
+$('fertigationOpen').onclick=openFertigationPage;$('fertigationPageBack').onclick=()=>showPage('detail');
+$('petioleForm').onsubmit=e=>{e.preventDefault();const f=currentFarm();if(!f)return;try{const report=collectReport('pet',PET_FIELDS,'petioleUnit');if(f.petioleReport){f.petioleHistory=f.petioleHistory||[];f.petioleHistory.push({...f.petioleReport,values:{...f.petioleReport.values}});}f.petioleReport=report;delete f.lastRec;f.fertilizerDraft=[];save();renderPetiolePage();alert('Petiole Report सेव्ह झाला. Recommendation पुन्हा उघडल्यावर नव्याने calculate होईल.');}catch(err){alert(err.message);}};
+$('saveManualEtoKc').onclick=()=>{const f=currentFarm(),status=$('manualWeatherStatus');if(!f){if(status)status.textContent='आधी My Farms मधून फार्म उघडा.';return;}const etoRaw=$('manualEto').value,eto=etoRaw===''?NaN:Number(etoRaw);if(!Number.isFinite(eto)||eto<0){status.textContent='ETo (mm/day) मध्ये 0 किंवा त्यापेक्षा मोठी योग्य संख्या भरा.';return;}f.manualEto=eto;const cropDays=f.pruningDate?Math.floor((new Date(localDate()+'T12:00:00')-new Date(f.pruningDate+'T12:00:00'))/86400000):null;const kcInfo=f.tank&&cropDays!==null?kcForDays(cropDays,f.tank.lineDist):{kc:null};if(Number.isFinite(kcInfo.kc))f.manualKc=kcInfo.kc;const ok=save();status.textContent=ok?`✓ ETo सेव्ह झाला: ${eto.toFixed(2)} mm/day`:'माहिती या सत्रात घेतली, पण फोनमध्ये कायम सेव्ह झाली नाही. Browser storage permission तपासा.';try{renderWater();renderIrrigationEstimate();}catch(err){console.error(err);status.textContent+=(status.textContent?' · ':'')+'Water estimate refresh मध्ये अडचण आली.';}};
+render();
+</script></body></html>
